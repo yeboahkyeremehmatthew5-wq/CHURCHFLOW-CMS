@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ChurchFlow CMS</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- ==================================================
+         SIDEBAR
+    =================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <i class="fa-solid fa-church"></i>
+            </div>
+
+            <div class="brand-text">
+
+                <h2>ChurchFlow</h2>
+
+                <span>
+                    Church Management
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="menu-title">
+            MAIN MENU
+        </div>
+
+
+        <nav class="sidebar-menu">
+
+            <button
+                type="button"
+                class="nav-item active"
+                data-page="dashboard"
+            >
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="members"
+            >
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Members</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="attendance"
+            >
+
+                <i class="fa-solid fa-calendar-check"></i>
+
+                <span>Attendance</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="departments"
+            >
+
+                <i class="fa-solid fa-sitemap"></i>
+
+                <span>Departments</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="events"
+            >
+
+                <i class="fa-solid fa-calendar-days"></i>
+
+                <span>Events</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="offerings"
+            >
+
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+
+                <span>Offerings</span>
+
+            </button>
+
+
+            <div class="menu-title">
+                MANAGEMENT
+            </div>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="reports"
+            >
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="users"
+            >
+
+                <i class="fa-solid fa-user-gear"></i>
+
+                <span>Users</span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-page="settings"
+            >
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                type="button"
+                id="logoutButton"
+                class="logout-button"
+            >
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ==================================================
+         MAIN AREA
+    =================================================== -->
+
+    <main class="main-area">
+
+
+        <!-- ==================================================
+             TOPBAR
+        =================================================== -->
+
+        <header class="topbar">
+
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    id="mobileMenu"
+                    class="mobile-menu"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div>
+
+                    <h3 id="pageTitle">
+                        Dashboard
+                    </h3>
+
+                    <span id="currentDate">
+                        Loading date...
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+
+                <button
+                    type="button"
+                    class="notification-button"
+                    title="Notifications"
+                >
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+                <div class="profile">
+
+                    <div class="profile-avatar">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+
+                    <div class="profile-info">
+
+                        <strong id="loggedInUsername">
+                            User
+                        </strong>
+
+                        <span id="loggedInRole">
+                            User
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ==================================================
+             CONTENT
+        =================================================== -->
+
+        <section class="content">
+
+
+            <!-- ==================================================
+                 DASHBOARD
+            =================================================== -->
+
+            <div
+                id="dashboard"
+                class="page active-page"
+            >
+
+
+                <!-- WELCOME -->
+
+                <div class="welcome-section">
+
+                    <div>
+
+                        <p class="welcome-small">
+                            Welcome back 👋
+                        </p>
+
+                        <h1>
+                            Church Dashboard
+                        </h1>
+
+                        <p>
+                            Here's what's happening in your church today.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        onclick="showPage('members')"
+                    >
+
+                        <i class="fa-solid fa-user-plus"></i>
+
+                        Add Member
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     STATISTICS
+                =================================================== -->
+
+                <div class="stats-grid">
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon members-icon">
+
+                            <i class="fa-solid fa-users"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Total Members
+                            </span>
+
+                            <strong id="totalMembers">
+                                0
+                            </strong>
+
+                            <small>
+                                Registered members
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon male-icon">
+
+                            <i class="fa-solid fa-mars"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Male Members
+                            </span>
+
+                            <strong id="maleMembers">
+                                0
+                            </strong>
+
+                            <small>
+                                Male members
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon female-icon">
+
+                            <i class="fa-solid fa-venus"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Female Members
+                            </span>
+
+                            <strong id="femaleMembers">
+                                0
+                            </strong>
+
+                            <small>
+                                Female members
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon active-icon">
+
+                            <i class="fa-solid fa-user-check"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Active Members
+                            </span>
+
+                            <strong id="activeMembers">
+                                0
+                            </strong>
+
+                            <small>
+                                Currently active
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     ATTENDANCE + EVENTS
+                =================================================== -->
+
+                <div class="dashboard-grid">
+
+
+                    <!-- ATTENDANCE -->
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <h3>
+                                    Attendance Overview
+                                </h3>
+
+                                <p>
+                                    Attendance records
+                                </p>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="card-action"
+                                onclick="showPage('attendance')"
+                            >
+                                View
+                            </button>
+
+                        </div>
+
+
+                        <div class="attendance-overview">
+
+
+                            <div
+                                class="attendance-circle"
+                                id="attendanceCircle"
+                            >
+
+                                <div>
+
+                                    <strong
+                                        id="attendancePercentage"
+                                    >
+                                        0%
+                                    </strong>
+
+                                    <span>
+                                        Present
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="attendance-details">
+
+
+                                <div class="attendance-item">
+
+                                    <span>
+
+                                        <i class="fa-solid fa-circle present-dot"></i>
+
+                                        Present
+
+                                    </span>
+
+                                    <strong id="presentCount">
+                                        0
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="attendance-item">
+
+                                    <span>
+
+                                        <i class="fa-solid fa-circle absent-dot"></i>
+
+                                        Absent
+
+                                    </span>
+
+                                    <strong id="absentCount">
+                                        0
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="attendance-item">
+
+                                    <span>
+
+                                        <i class="fa-solid fa-circle total-dot"></i>
+
+                                        Total
+
+                                    </span>
+
+                                    <strong id="attendanceTotal">
+                                        0
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- EVENTS -->
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <h3>
+                                    Upcoming Events
+                                </h3>
+
+                                <p>
+                                    Church activities
+                                </p>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="card-action"
+                                onclick="showPage('events')"
+                            >
+                                View All
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="dashboardEvents"
+                            class="event-preview"
+                        >
+
+                            <div class="empty-dashboard">
+
+                                <i class="fa-regular fa-calendar"></i>
+
+                                <p>
+                                    Loading events...
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     BIRTHDAYS TODAY
+                =================================================== -->
+
+                <div class="dashboard-card birthday-panel">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                🎂 Birthdays Today
+                            </h3>
+
+                            <p>
+                                Members celebrating their birthday today
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="birthdayList"
+                        class="birthday-list"
+                    >
+
+                        <div class="empty-dashboard">
+
+                            <i class="fa-solid fa-cake-candles"></i>
+
+                            <p>
+                                Checking birthdays...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     QUICK ACTIONS
+                =================================================== -->
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h2>
+                            Quick Actions
+                        </h2>
+
+                        <p>
+                            Manage your church quickly
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quick-actions">
+
+
+                    <button
+                        type="button"
+                        class="quick-action"
+                        onclick="showPage('members')"
+                    >
+
+                        <div class="quick-icon">
+
+                            <i class="fa-solid fa-user-plus"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Add Member
+                            </strong>
+
+                            <span>
+                                Register a new member
+                            </span>
+
+                        </div>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        class="quick-action"
+                        onclick="showPage('attendance')"
+                    >
+
+                        <div class="quick-icon">
+
+                            <i class="fa-solid fa-calendar-check"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Take Attendance
+                            </strong>
+
+                            <span>
+                                Record attendance
+                            </span>
+
+                        </div>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        class="quick-action"
+                        onclick="showPage('events')"
+                    >
+
+                        <div class="quick-icon">
+
+                            <i class="fa-solid fa-calendar-plus"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Create Event
+                            </strong>
+
+                            <span>
+                                Add church event
+                            </span>
+
+                        </div>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        class="quick-action"
+                        onclick="showPage('reports')"
+                    >
+
+                        <div class="quick-icon">
+
+                            <i class="fa-solid fa-chart-line"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                View Reports
+                            </strong>
+
+                            <span>
+                                Church statistics
+                            </span>
+
+                        </div>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     RECENT MEMBERS
+                =================================================== -->
+
+                <div class="dashboard-card recent-members-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Recent Members
+                            </h3>
+
+                            <p>
+                                Recently registered members
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="card-action"
+                            onclick="showPage('members')"
+                        >
+                            View All
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="recentMembers"
+                        class="recent-members"
+                    >
+
+                        <div class="empty-dashboard">
+
+                            <i class="fa-solid fa-users"></i>
+
+                            <p>
+                                Loading members...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 MEMBERS
+            =================================================== -->
+
+            <div
+                id="members"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Members
+                        </h1>
+
+                        <p>
+                            Manage church members.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <h3>
+                            Member Information
+                        </h3>
+
+                        <p>
+                            Register a new church member.
+                        </p>
+
+                    </div>
+
+
+                    <form id="memberForm">
+
+                        <input
+                            type="hidden"
+                            id="memberId"
+                        >
+
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="memberName">
+                                    Full Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="memberName"
+                                    placeholder="Enter full name"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberGender">
+                                    Gender
+                                </label>
+
+                                <select id="memberGender">
+
+                                    <option value="">
+                                        Select gender
+                                    </option>
+
+                                    <option value="Male">
+                                        Male
+                                    </option>
+
+                                    <option value="Female">
+                                        Female
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberDob">
+                                    Date of Birth
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="memberDob"
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberPhone">
+                                    Phone
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="memberPhone"
+                                    placeholder="0240000000"
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberAddress">
+                                    Address
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="memberAddress"
+                                    placeholder="Enter address"
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberDateJoined">
+                                    Date Joined
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="memberDateJoined"
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberDepartment">
+                                    Department
+                                </label>
+
+                                <select id="memberDepartment">
+
+                                    <option value="">
+                                        Select department
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="memberStatus">
+                                    Status
+                                </label>
+
+                                <select id="memberStatus">
+
+                                    <option value="Active">
+                                        Active
+                                    </option>
+
+                                    <option value="Inactive">
+                                        Inactive
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-floppy-disk"></i>
+
+                                Save Member
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                id="cancelMemberEdit"
+                                class="secondary-button"
+                                style="display:none;"
+                            >
+
+                                Cancel
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-card">
+
+                    <div class="table-header">
+
+                        <div>
+
+                            <h3>
+                                All Members
+                            </h3>
+
+                            <p>
+                                Registered church members
+                            </p>
+
+                        </div>
+
+
+                        <div class="search-box">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="text"
+                                id="memberSearch"
+                                placeholder="Search members..."
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Phone</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="memberList"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 ATTENDANCE
+            =================================================== -->
+
+            <div
+                id="attendance"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Attendance
+                        </h1>
+
+                        <p>
+                            Record and monitor church attendance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="attendanceForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="attendanceMember">
+                                    Member
+                                </label>
+
+                                <select
+                                    id="attendanceMember"
+                                    required
+                                >
+
+                                    <option value="">
+                                        Select member
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="attendanceDate">
+                                    Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="attendanceDate"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="attendanceStatus">
+                                    Status
+                                </label>
+
+                                <select
+                                    id="attendanceStatus"
+                                    required
+                                >
+
+                                    <option value="Present">
+                                        Present
+                                    </option>
+
+                                    <option value="Absent">
+                                        Absent
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-check"></i>
+
+                                Save Attendance
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-card">
+
+                    <div class="table-header">
+
+                        <div>
+
+                            <h3>
+                                Attendance Records
+                            </h3>
+
+                            <p>
+                                Recorded attendance information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Member ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="attendanceList"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 DEPARTMENTS
+            =================================================== -->
+
+            <div
+                id="departments"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Departments
+                        </h1>
+
+                        <p>
+                            Manage church departments and ministries.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="departmentForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="departmentName">
+                                    Department Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="departmentName"
+                                    placeholder="e.g. Youth Ministry"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="departmentDescription">
+                                    Description
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="departmentDescription"
+                                    placeholder="Department description"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add Department
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div
+                    id="departmentList"
+                    class="department-grid"
+                ></div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 EVENTS
+            =================================================== -->
+
+            <div
+                id="events"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Events
+                        </h1>
+
+                        <p>
+                            Plan and manage church events.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="eventForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="eventTitle">
+                                    Event Title
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="eventTitle"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="eventDate">
+                                    Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="eventDate"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="eventTime">
+                                    Time
+                                </label>
+
+                                <input
+                                    type="time"
+                                    id="eventTime"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="eventVenue">
+                                    Venue
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="eventVenue"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group full-width">
+
+                                <label for="eventDescription">
+                                    Description
+                                </label>
+
+                                <textarea
+                                    id="eventDescription"
+                                ></textarea>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-calendar-plus"></i>
+
+                                Create Event
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div
+                    id="eventList"
+                    class="event-grid"
+                ></div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 OFFERINGS
+            =================================================== -->
+
+            <div
+                id="offerings"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Offerings
+                        </h1>
+
+                        <p>
+                            Record and manage church offerings.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="offeringForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="offeringDate">
+                                    Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="offeringDate"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="offeringAmount">
+                                    Amount (GH₵)
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="offeringAmount"
+                                    placeholder="0.00"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="offeringCategory">
+                                    Category
+                                </label>
+
+                                <select id="offeringCategory">
+
+                                    <option value="Offering">
+                                        Offering
+                                    </option>
+
+                                    <option value="Tithe">
+                                        Tithe
+                                    </option>
+
+                                    <option value="Donation">
+                                        Donation
+                                    </option>
+
+                                    <option value="Special">
+                                        Special
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="offeringDescription">
+                                    Description
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="offeringDescription"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-floppy-disk"></i>
+
+                                Save Offering
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-card">
+
+                    <div class="table-header">
+
+                        <div>
+
+                            <h3>
+                                Offering Records
+                            </h3>
+
+                            <p>
+                                Church financial records
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="offeringList"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 REPORTS
+            =================================================== -->
+
+            <div
+                id="reports"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Reports
+                        </h1>
+
+                        <p>
+                            View church statistics.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon members-icon">
+
+                            <i class="fa-solid fa-users"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Total Members
+                            </span>
+
+                            <strong id="reportTotalMembers">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon active-icon">
+
+                            <i class="fa-solid fa-user-check"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Active Members
+                            </span>
+
+                            <strong id="reportActiveMembers">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon male-icon">
+
+                            <i class="fa-solid fa-mars"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Male
+                            </span>
+
+                            <strong id="reportMaleMembers">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon female-icon">
+
+                            <i class="fa-solid fa-venus"></i>
+
+                        </div>
+
+                        <div class="stat-information">
+
+                            <span>
+                                Female
+                            </span>
+
+                            <strong id="reportFemaleMembers">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 USERS
+            =================================================== -->
+
+            <div
+                id="users"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Users
+                        </h1>
+
+                        <p>
+                            Manage ChurchFlow system users.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="userForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="userName">
+                                    Username
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="userName"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="userEmail">
+                                    Email
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="userEmail"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="userPassword">
+                                    Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    id="userPassword"
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="userRole">
+                                    Role
+                                </label>
+
+                                <select id="userRole">
+
+                                    <option value="Admin">
+                                        Admin
+                                    </option>
+
+                                    <option value="Pastor">
+                                        Pastor
+                                    </option>
+
+                                    <option value="Staff">
+                                        Staff
+                                    </option>
+
+                                    <option value="User">
+                                        User
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-user-plus"></i>
+
+                                Save User
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-card">
+
+                    <div class="table-header">
+
+                        <div>
+
+                            <h3>
+                                System Users
+                            </h3>
+
+                            <p>
+                                ChurchFlow accounts
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="userList"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 SETTINGS
+            =================================================== -->
+
+            <div
+                id="settings"
+                class="page"
+            >
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <h1>
+                            Settings
+                        </h1>
+
+                        <p>
+                            Configure your ChurchFlow system.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card">
+
+                    <form id="settingsForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="systemName">
+                                    System Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="systemName"
+                                    value="ChurchFlow CMS"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="systemTheme">
+                                    Theme
+                                </label>
+
+                                <select id="systemTheme">
+
+                                    <option value="light">
+                                        Light
+                                    </option>
+
+                                    <option value="dark">
+                                        Dark
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+
+                                <i class="fa-solid fa-floppy-disk"></i>
+
+                                Save Settings
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- ==================================================
+     JAVASCRIPT
+================================================== -->
+
+<script src="script.js"></script>
+
+
+</body>
+
+</html>

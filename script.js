@@ -23,26 +23,66 @@ let currentUser = null;
 // ======================================================
 
 function getLoggedInUser() {
-    const localUser = localStorage.getItem("churchflowUser");
-    const sessionUser = sessionStorage.getItem("churchflowUser");
+
+    const localUser =
+        localStorage.getItem("churchflowUser");
+
+    const sessionUser =
+        sessionStorage.getItem("churchflowUser");
 
     if (localUser) {
-        return JSON.parse(localUser);
+
+        try {
+            return JSON.parse(localUser);
+
+        } catch (error) {
+
+            console.error(
+                "Invalid local user data:",
+                error
+            );
+
+            localStorage.removeItem(
+                "churchflowUser"
+            );
+        }
     }
 
     if (sessionUser) {
-        return JSON.parse(sessionUser);
+
+        try {
+            return JSON.parse(sessionUser);
+
+        } catch (error) {
+
+            console.error(
+                "Invalid session user data:",
+                error
+            );
+
+            sessionStorage.removeItem(
+                "churchflowUser"
+            );
+        }
     }
 
     return null;
 }
 
 
+// ======================================================
+// CHECK AUTHENTICATION
+// ======================================================
+
 function checkAuthentication() {
-    currentUser = getLoggedInUser();
+
+    currentUser =
+        getLoggedInUser();
 
     if (!currentUser) {
-        window.location.href = "./login.html";
+
+        window.location.href = "http://127.0.0.1:5501/login.html";
+
         return false;
     }
 
@@ -50,11 +90,15 @@ function checkAuthentication() {
 }
 
 
+// ======================================================
+// LOGOUT
+// ======================================================
+
 function logout() {
     localStorage.removeItem("churchflowUser");
     sessionStorage.removeItem("churchflowUser");
 
-    window.location.href = "./login.html";
+    window.location.href = "http://127.0.0.1:5501/login.html";
 }
 
 
@@ -63,19 +107,33 @@ function logout() {
 // ======================================================
 
 function displayLoggedInUser() {
+
     if (!currentUser) {
         return;
     }
 
-    const usernameElement = document.getElementById("loggedInUsername");
-    const roleElement = document.getElementById("loggedInRole");
+    const usernameElement =
+        document.getElementById(
+            "loggedInUsername"
+        );
+
+    const roleElement =
+        document.getElementById(
+            "loggedInRole"
+        );
 
     if (usernameElement) {
-        usernameElement.textContent = currentUser.username || "User";
+
+        usernameElement.textContent =
+            currentUser.username ||
+            "User";
     }
 
     if (roleElement) {
-        roleElement.textContent = currentUser.role || "User";
+
+        roleElement.textContent =
+            currentUser.role ||
+            "User";
     }
 }
 
@@ -85,106 +143,405 @@ function displayLoggedInUser() {
 // ======================================================
 
 function normalizeRole(role) {
-    return String(role || "").toLowerCase();
-}
 
+    return String(role || "")
+        .trim()
+        .toLowerCase();
+}
 
 function isAdmin() {
-    return normalizeRole(currentUser?.role) === "admin";
-}
 
+    return (
+        normalizeRole(currentUser?.role) ===
+        "admin"
+    );
+}
 
 function isPastor() {
-    return normalizeRole(currentUser?.role) === "pastor";
-}
 
+    return (
+        normalizeRole(currentUser?.role) ===
+        "pastor"
+    );
+}
 
 function isStaff() {
-    return normalizeRole(currentUser?.role) === "staff";
+
+    return (
+        normalizeRole(currentUser?.role) ===
+        "staff"
+    );
 }
 
+function isMember() {
+
+    return (
+        normalizeRole(currentUser?.role) ===
+        "member"
+    );
+}
+
+
+// ======================================================
+// PERMISSION FUNCTIONS
+// ======================================================
 
 function canManageUsers() {
+
     return isAdmin();
 }
 
-
 function canManageSettings() {
+
     return isAdmin();
+}
+
+function canManageMembers() {
+
+    return (
+        isAdmin() ||
+        isPastor() ||
+        isStaff()
+    );
+}
+
+function canManageAttendance() {
+
+    return (
+        isAdmin() ||
+        isPastor() ||
+        isStaff()
+    );
+}
+
+function canManageDepartments() {
+
+    return (
+        isAdmin() ||
+        isPastor() ||
+        isStaff()
+    );
+}
+
+function canManageEvents() {
+
+    return (
+        isAdmin() ||
+        isPastor() ||
+        isStaff()
+    );
+}
+
+function canManageOfferings() {
+
+    return (
+        isAdmin() ||
+        isPastor()
+    );
+}
+
+function isMemberOnly() {
+
+    return isMember();
+}
+
+
+// ======================================================
+// PAGE ACCESS CONTROL
+// ======================================================
+
+function canAccessPage(pageId) {
+
+    if (isMemberOnly()) {
+
+        return pageId === "dashboard";
+    }
+
+    if (pageId === "users") {
+
+        return canManageUsers();
+    }
+
+    if (pageId === "settings") {
+
+        return canManageSettings();
+    }
+
+    if (pageId === "members") {
+
+        return canManageMembers();
+    }
+
+    if (pageId === "attendance") {
+
+        return canManageAttendance();
+    }
+
+    if (pageId === "departments") {
+
+        return canManageDepartments();
+    }
+
+    if (pageId === "events") {
+
+        return canManageEvents();
+    }
+
+    if (pageId === "offerings") {
+
+        return canManageOfferings();
+    }
+
+    return true;
+}
+
+
+// ======================================================
+// APPLY ROLE PERMISSIONS TO SIDEBAR
+// ======================================================
+
+function applyRolePermissions() {
+
+    const navLinks =
+        document.querySelectorAll(
+            "[data-page]"
+        );
+
+    navLinks.forEach(function (link) {
+
+        const page =
+            link.getAttribute(
+                "data-page"
+            );
+
+        if (isMember()) {
+
+            if (page !== "dashboard") {
+
+                link.style.display =
+                    "none";
+            }
+
+            return;
+        }
+
+        if (
+            page === "users" ||
+            page === "settings"
+        ) {
+
+            if (!isAdmin()) {
+
+                link.style.display =
+                    "none";
+
+            } else {
+
+                link.style.display =
+                    "";
+            }
+
+            return;
+        }
+
+        if (page === "offerings") {
+
+            if (!canManageOfferings()) {
+
+                link.style.display =
+                    "none";
+
+            } else {
+
+                link.style.display =
+                    "";
+            }
+
+            return;
+        }
+
+        if (
+            page === "members" ||
+            page === "attendance" ||
+            page === "departments" ||
+            page === "events"
+        ) {
+
+            if (!canAccessPage(page)) {
+
+                link.style.display =
+                    "none";
+
+            } else {
+
+                link.style.display =
+                    "";
+            }
+        }
+
+    });
 }
 
 
 // ======================================================
 // PAGE NAVIGATION
-// IMPORTANT: HTML USES "active-page"
 // ======================================================
 
 function showPage(pageId) {
 
-    const pages = document.querySelectorAll(".page");
+    if (!canAccessPage(pageId)) {
 
-    pages.forEach(function (page) {
-        page.classList.remove("active-page");
-    });
+        alert(
+            "You do not have permission to access this page."
+        );
 
-    const selectedPage = document.getElementById(pageId);
+        if (isMemberOnly()) {
 
-    if (selectedPage) {
-        selectedPage.classList.add("active-page");
+            pageId =
+                "dashboard";
+
+        } else {
+
+            return;
+        }
     }
 
-    const title = document.getElementById("pageTitle");
+    const pages =
+        document.querySelectorAll(
+            ".page"
+        );
+
+    pages.forEach(function (page) {
+
+        page.classList.remove(
+            "active-page"
+        );
+
+    });
+
+    const selectedPage =
+        document.getElementById(
+            pageId
+        );
+
+    if (selectedPage) {
+
+        selectedPage.classList.add(
+            "active-page"
+        );
+    }
+
+    const title =
+        document.getElementById(
+            "pageTitle"
+        );
 
     const titles = {
-        dashboard: "Dashboard",
-        members: "Members",
-        attendance: "Attendance",
-        departments: "Departments",
-        events: "Events",
-        offerings: "Offerings",
-        reports: "Reports",
-        users: "Users",
-        settings: "Settings"
+
+        dashboard:
+            "Dashboard",
+
+        members:
+            "Members",
+
+        attendance:
+            "Attendance",
+
+        departments:
+            "Departments",
+
+        events:
+            "Events",
+
+        offerings:
+            "Offerings",
+
+        reports:
+            "Reports",
+
+        users:
+            "Users",
+
+        settings:
+            "Settings"
     };
 
     if (title) {
-        title.textContent = titles[pageId] || "ChurchFlow CMS";
+
+        title.textContent =
+            titles[pageId] ||
+            "ChurchFlow CMS";
     }
 
-    // Refresh data when opening pages
-    if (pageId === "dashboard") {
+    if (
+        pageId ===
+        "dashboard"
+    ) {
+
         refreshDashboard();
     }
 
-    if (pageId === "members") {
+    if (
+        pageId ===
+        "members"
+    ) {
+
         loadMembers();
     }
 
-    if (pageId === "attendance") {
+    if (
+        pageId ===
+        "attendance"
+    ) {
+
         loadAttendance();
     }
 
-    if (pageId === "departments") {
+    if (
+        pageId ===
+        "departments"
+    ) {
+
         loadDepartments();
     }
 
-    if (pageId === "events") {
+    if (
+        pageId ===
+        "events"
+    ) {
+
         loadEvents();
     }
 
-    if (pageId === "offerings") {
+    if (
+        pageId ===
+        "offerings"
+    ) {
+
         loadOfferings();
     }
 
-    if (pageId === "reports") {
+    if (
+        pageId ===
+        "reports"
+    ) {
+
         loadReports();
     }
 
-    if (pageId === "users") {
+    if (
+        pageId ===
+        "users"
+    ) {
+
         loadUsers();
     }
 
-    if (pageId === "settings") {
+    if (
+        pageId ===
+        "settings"
+    ) {
+
         loadSettings();
     }
 }
@@ -194,40 +551,78 @@ function showPage(pageId) {
 // API HELPERS
 // ======================================================
 
-async function getJSON(url, options = {}) {
+async function getJSON(
+    url,
+    options = {}
+) {
 
     try {
 
-        const response = await fetch(url, options);
+        const response =
+            await fetch(
+                url,
+                options
+            );
 
-        const contentType = response.headers.get("content-type") || "";
+        const contentType =
+            response.headers.get(
+                "content-type"
+            ) || "";
 
         let data;
 
-        if (contentType.includes("application/json")) {
-            data = await response.json();
+        if (
+            contentType.includes(
+                "application/json"
+            )
+        ) {
+
+            data =
+                await response.json();
+
         } else {
-            data = await response.text();
+
+            data =
+                await response.text();
         }
 
         if (!response.ok) {
 
-            let message = "Request failed";
+            let message =
+                "Request failed";
 
-            if (typeof data === "object" && data?.detail) {
-                message = data.detail;
-            } else if (typeof data === "string" && data) {
-                message = data;
+            if (
+                typeof data ===
+                    "object" &&
+                data?.detail
+            ) {
+
+                message =
+                    data.detail;
+
+            } else if (
+                typeof data ===
+                    "string" &&
+                data
+            ) {
+
+                message =
+                    data;
             }
 
-            throw new Error(message);
+            throw new Error(
+                message
+            );
         }
 
         return data;
 
     } catch (error) {
 
-        console.error("API Error:", error);
+        console.error(
+            "API Error:",
+            error
+        );
 
         throw error;
     }
@@ -240,89 +635,175 @@ async function getJSON(url, options = {}) {
 
 function escapeHTML(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
         return "";
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
+function setText(
+    id,
+    value
+) {
 
-function setText(id, value) {
-
-    const element = document.getElementById(id);
+    const element =
+        document.getElementById(
+            id
+        );
 
     if (element) {
-        element.textContent = value ?? "";
+
+        element.textContent =
+            value ?? "";
     }
 }
 
-
-function formatDate(dateValue) {
+function formatDate(
+    dateValue
+) {
 
     if (!dateValue) {
+
         return "-";
     }
 
-    const date = new Date(dateValue);
+    const date =
+        new Date(dateValue);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
         return dateValue;
     }
 
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const year =
+        date.getFullYear();
 
     return `${day}/${month}/${year}`;
 }
 
-
 function getTodayISO() {
 
-    const now = new Date();
+    const now =
+        new Date();
 
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
 
     return `${year}-${month}-${day}`;
 }
 
-
-function formatTime(timeValue) {
+function formatTime(
+    timeValue
+) {
 
     if (!timeValue) {
+
         return "-";
     }
 
-    const parts = String(timeValue).split(":");
+    const parts =
+        String(timeValue)
+            .split(":");
 
-    if (parts.length < 2) {
+    if (
+        parts.length < 2
+    ) {
+
         return timeValue;
     }
 
-    let hour = Number(parts[0]);
-    const minute = parts[1];
+    let hour =
+        Number(parts[0]);
 
-    const suffix = hour >= 12 ? "PM" : "AM";
+    const minute =
+        parts[1];
 
-    hour = hour % 12;
+    const suffix =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+    hour =
+        hour % 12;
 
     if (hour === 0) {
+
         hour = 12;
     }
 
     return `${hour}:${minute} ${suffix}`;
 }
 
+function showMessage(
+    message
+) {
 
-function showMessage(message) {
     alert(message);
 }
 
@@ -335,22 +816,36 @@ async function loadMembers() {
 
     try {
 
-        const data = await getJSON(`${API_URL}/members`);
+        const data =
+            await getJSON(
+                `${API_URL}/members`
+            );
 
-        allMembers = Array.isArray(data) ? data : [];
+        allMembers =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderMembers();
+
         updateMemberDropdown();
 
         refreshDashboard();
 
     } catch (error) {
 
-        console.error("Unable to load members:", error);
+        console.error(
+            "Unable to load members:",
+            error
+        );
 
-        const list = document.getElementById("memberList");
+        const list =
+            document.getElementById(
+                "memberList"
+            );
 
         if (list) {
+
             list.innerHTML = `
                 <tr>
                     <td colspan="7">
@@ -363,32 +858,59 @@ async function loadMembers() {
 }
 
 
-function getMemberName(member) {
+// ======================================================
+// GET MEMBER NAME
+// ======================================================
+
+function getMemberName(
+    member
+) {
 
     if (!member) {
+
         return "Unknown Member";
     }
 
     if (member.name) {
+
         return member.name;
     }
 
-    const firstName = member.first_name || "";
-    const lastName = member.last_name || "";
+    const firstName =
+        member.first_name ||
+        "";
 
-    return `${firstName} ${lastName}`.trim() || "Unknown Member";
+    const lastName =
+        member.last_name ||
+        "";
+
+    return (
+        `${firstName} ${lastName}`
+            .trim() ||
+        "Unknown Member"
+    );
 }
 
 
+// ======================================================
+// RENDER MEMBERS
+// ======================================================
+
 function renderMembers() {
 
-    const list = document.getElementById("memberList");
+    const list =
+        document.getElementById(
+            "memberList"
+        );
 
     if (!list) {
+
         return;
     }
 
-    if (allMembers.length === 0) {
+    if (
+        allMembers.length === 0
+    ) {
 
         list.innerHTML = `
             <tr>
@@ -401,73 +923,100 @@ function renderMembers() {
         return;
     }
 
-    list.innerHTML = allMembers.map(function (member) {
+    list.innerHTML =
+        allMembers.map(
+            function (member) {
 
-        const id = member.id;
+                const id =
+                    member.id;
 
-        const name = getMemberName(member);
+                const name =
+                    getMemberName(
+                        member
+                    );
 
-        const gender = member.gender || "-";
+                const gender =
+                    member.gender ||
+                    "-";
 
-        const phone = member.phone || "-";
+                const phone =
+                    member.phone ||
+                    "-";
 
-        const department = member.department || "-";
+                const department =
+                    member.department ||
+                    "-";
 
-        const status = member.status || "Active";
+                const status =
+                    member.status ||
+                    "Active";
 
-        return `
-            <tr>
+                let actions =
+                    "";
 
-                <td>
-                    MEM-${escapeHTML(id)}
-                </td>
+                if (
+                    canManageMembers()
+                ) {
 
-                <td>
-                    ${escapeHTML(name)}
-                </td>
+                    actions = `
 
-                <td>
-                    ${escapeHTML(gender)}
-                </td>
+                        <button
+                            type="button"
+                            class="edit-btn"
+                            onclick="editMember(${id})"
+                        >
+                            Edit
+                        </button>
 
-                <td>
-                    ${escapeHTML(phone)}
-                </td>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteMember(${id})"
+                        >
+                            Delete
+                        </button>
 
-                <td>
-                    ${escapeHTML(department)}
-                </td>
+                    `;
+                }
 
-                <td>
-                    <span class="status-badge">
-                        ${escapeHTML(status)}
-                    </span>
-                </td>
+                return `
+                    <tr>
 
-                <td>
+                        <td>
+                            MEM-${escapeHTML(id)}
+                        </td>
 
-                    <button
-                        type="button"
-                        class="edit-btn"
-                        onclick="editMember(${id})"
-                    >
-                        Edit
-                    </button>
+                        <td>
+                            ${escapeHTML(name)}
+                        </td>
 
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        onclick="deleteMember(${id})"
-                    >
-                        Delete
-                    </button>
+                        <td>
+                            ${escapeHTML(gender)}
+                        </td>
 
-                </td>
+                        <td>
+                            ${escapeHTML(phone)}
+                        </td>
 
-            </tr>
-        `;
+                        <td>
+                            ${escapeHTML(department)}
+                        </td>
 
-    }).join("");
+                        <td>
+                            <span class="status-badge">
+                                ${escapeHTML(status)}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${actions}
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+        ).join("");
 }
 
 
@@ -477,36 +1026,80 @@ function renderMembers() {
 
 function searchMembers() {
 
-    const searchInput = document.getElementById("memberSearch");
+    const searchInput =
+        document.getElementById(
+            "memberSearch"
+        );
 
-    const list = document.getElementById("memberList");
+    const list =
+        document.getElementById(
+            "memberList"
+        );
 
-    if (!searchInput || !list) {
+    if (
+        !searchInput ||
+        !list
+    ) {
+
         return;
     }
 
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    const searchTerm =
+        searchInput.value
+            .toLowerCase()
+            .trim();
 
-    const filteredMembers = allMembers.filter(function (member) {
+    const filteredMembers =
+        allMembers.filter(
+            function (member) {
 
-        const name = getMemberName(member).toLowerCase();
+                const name =
+                    getMemberName(
+                        member
+                    ).toLowerCase();
 
-        const phone = String(member.phone || "").toLowerCase();
+                const phone =
+                    String(
+                        member.phone ||
+                        ""
+                    ).toLowerCase();
 
-        const email = String(member.email || "").toLowerCase();
+                const email =
+                    String(
+                        member.email ||
+                        ""
+                    ).toLowerCase();
 
-        const department = String(member.department || "").toLowerCase();
+                const department =
+                    String(
+                        member.department ||
+                        ""
+                    ).toLowerCase();
 
-        return (
-            name.includes(searchTerm) ||
-            phone.includes(searchTerm) ||
-            email.includes(searchTerm) ||
-            department.includes(searchTerm)
+                return (
+
+                    name.includes(
+                        searchTerm
+                    ) ||
+
+                    phone.includes(
+                        searchTerm
+                    ) ||
+
+                    email.includes(
+                        searchTerm
+                    ) ||
+
+                    department.includes(
+                        searchTerm
+                    )
+                );
+            }
         );
-    });
 
-
-    if (filteredMembers.length === 0) {
+    if (
+        filteredMembers.length === 0
+    ) {
 
         list.innerHTML = `
             <tr>
@@ -519,64 +1112,100 @@ function searchMembers() {
         return;
     }
 
+    list.innerHTML =
+        filteredMembers.map(
+            function (member) {
 
-    list.innerHTML = filteredMembers.map(function (member) {
+                const id =
+                    member.id;
 
-        const id = member.id;
+                const name =
+                    getMemberName(
+                        member
+                    );
 
-        const name = getMemberName(member);
+                const gender =
+                    member.gender ||
+                    "-";
 
-        const gender = member.gender || "-";
+                const phone =
+                    member.phone ||
+                    "-";
 
-        const phone = member.phone || "-";
+                const department =
+                    member.department ||
+                    "-";
 
-        const department = member.department || "-";
+                const status =
+                    member.status ||
+                    "Active";
 
-        const status = member.status || "Active";
+                let actions =
+                    "";
 
-        return `
-            <tr>
+                if (
+                    canManageMembers()
+                ) {
 
-                <td>MEM-${escapeHTML(id)}</td>
+                    actions = `
 
-                <td>${escapeHTML(name)}</td>
+                        <button
+                            type="button"
+                            class="edit-btn"
+                            onclick="editMember(${id})"
+                        >
+                            Edit
+                        </button>
 
-                <td>${escapeHTML(gender)}</td>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteMember(${id})"
+                        >
+                            Delete
+                        </button>
 
-                <td>${escapeHTML(phone)}</td>
+                    `;
+                }
 
-                <td>${escapeHTML(department)}</td>
+                return `
+                    <tr>
 
-                <td>
-                    <span class="status-badge">
-                        ${escapeHTML(status)}
-                    </span>
-                </td>
+                        <td>
+                            MEM-${escapeHTML(id)}
+                        </td>
 
-                <td>
+                        <td>
+                            ${escapeHTML(name)}
+                        </td>
 
-                    <button
-                        type="button"
-                        class="edit-btn"
-                        onclick="editMember(${id})"
-                    >
-                        Edit
-                    </button>
+                        <td>
+                            ${escapeHTML(gender)}
+                        </td>
 
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        onclick="deleteMember(${id})"
-                    >
-                        Delete
-                    </button>
+                        <td>
+                            ${escapeHTML(phone)}
+                        </td>
 
-                </td>
+                        <td>
+                            ${escapeHTML(department)}
+                        </td>
 
-            </tr>
-        `;
+                        <td>
+                            <span class="status-badge">
+                                ${escapeHTML(status)}
+                            </span>
+                        </td>
 
-    }).join("");
+                        <td>
+                            ${actions}
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+        ).join("");
 }
 
 
@@ -586,101 +1215,173 @@ function searchMembers() {
 
 function resetMemberForm() {
 
-    const form = document.getElementById("memberForm");
+    const form =
+        document.getElementById(
+            "memberForm"
+        );
 
     if (form) {
+
         form.reset();
     }
 
-    const memberId = document.getElementById("memberId");
+    const memberId =
+        document.getElementById(
+            "memberId"
+        );
 
     if (memberId) {
+
         memberId.value = "";
     }
 
-    const submitButton = document.querySelector(
-        "#memberForm button[type='submit']"
-    );
+    const submitButton =
+        document.querySelector(
+            "#memberForm button[type='submit']"
+        );
 
     if (submitButton) {
-        submitButton.textContent = "Save Member";
+
+        submitButton.textContent =
+            "Save Member";
     }
 
-    const cancelButton = document.getElementById("cancelMemberEdit");
+    const cancelButton =
+        document.getElementById(
+            "cancelMemberEdit"
+        );
 
     if (cancelButton) {
-        cancelButton.style.display = "none";
+
+        cancelButton.style.display =
+            "none";
     }
 }
 
 
-async function saveMember(event) {
+// ======================================================
+// SAVE MEMBER
+// ======================================================
+
+async function saveMember(
+    event
+) {
 
     event.preventDefault();
 
-    const memberId = document.getElementById("memberId")?.value;
+    if (!canManageMembers()) {
 
-    const fullName = document.getElementById("memberName")?.value.trim();
+        alert(
+            "You do not have permission to add or edit members."
+        );
 
-    const gender = document.getElementById("memberGender")?.value;
-
-    const dob = document.getElementById("memberDob")?.value || null;
-
-    const phone = document.getElementById("memberPhone")?.value.trim();
-
-    const address = document.getElementById("memberAddress")?.value.trim();
-
-    const dateJoined =
-        document.getElementById("memberDateJoined")?.value || null;
-
-    const department =
-        document.getElementById("memberDepartment")?.value;
-
-    const status =
-        document.getElementById("memberStatus")?.value || "Active";
-
-
-    if (!fullName) {
-        alert("Please enter the member's name.");
         return;
     }
 
+    const memberId =
+        document.getElementById(
+            "memberId"
+        )?.value;
 
-    const nameParts = fullName.split(/\s+/);
+    const fullName =
+        document.getElementById(
+            "memberName"
+        )?.value.trim();
 
-    const firstName = nameParts.shift() || "";
+    const gender =
+        document.getElementById(
+            "memberGender"
+        )?.value;
 
-    const lastName = nameParts.join(" ") || "";
+    const dob =
+        document.getElementById(
+            "memberDob"
+        )?.value || null;
 
+    const phone =
+        document.getElementById(
+            "memberPhone"
+        )?.value.trim();
+
+    const address =
+        document.getElementById(
+            "memberAddress"
+        )?.value.trim();
+
+    const dateJoined =
+        document.getElementById(
+            "memberDateJoined"
+        )?.value || null;
+
+    const department =
+        document.getElementById(
+            "memberDepartment"
+        )?.value;
+
+    const status =
+        document.getElementById(
+            "memberStatus"
+        )?.value ||
+        "Active";
+
+    if (!fullName) {
+
+        alert(
+            "Please enter the member's name."
+        );
+
+        return;
+    }
+
+    const nameParts =
+        fullName.split(/\s+/);
+
+    const firstName =
+        nameParts.shift() ||
+        "";
+
+    const lastName =
+        nameParts.join(" ") ||
+        "";
 
     const payload = {
 
-        name: fullName,
+        name:
+            fullName,
 
-        first_name: firstName,
+        first_name:
+            firstName,
 
-        last_name: lastName,
+        last_name:
+            lastName,
 
-        gender: gender || null,
+        gender:
+            gender || null,
 
-        dob: dob,
+        dob:
+            dob,
 
-        date_of_birth: dob,
+        date_of_birth:
+            dob,
 
-        phone: phone || null,
+        phone:
+            phone || null,
 
-        address: address || null,
+        address:
+            address || null,
 
-        date_joined: dateJoined,
+        date_joined:
+            dateJoined,
 
-        membership_date: dateJoined,
+        membership_date:
+            dateJoined,
 
-        department: department || null,
+        department:
+            department || null,
 
-        status: status
-
+        status:
+            status
     };
-
 
     try {
 
@@ -688,31 +1389,46 @@ async function saveMember(event) {
 
         if (memberId) {
 
-            response = await getJSON(
-                `${API_URL}/members/${memberId}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                }
-            );
+            response =
+                await getJSON(
+                    `${API_URL}/members/${memberId}`,
+                    {
+                        method:
+                            "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+                    }
+                );
 
         } else {
 
-            response = await getJSON(
-                `${API_URL}/members`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                }
-            );
-        }
+            response =
+                await getJSON(
+                    `${API_URL}/members`,
+                    {
+                        method:
+                            "POST",
 
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+                    }
+                );
+        }
 
         alert(
             memberId
@@ -720,14 +1436,16 @@ async function saveMember(event) {
                 : "Member added successfully."
         );
 
-
         resetMemberForm();
 
         await loadMembers();
 
     } catch (error) {
 
-        console.error("Save member error:", error);
+        console.error(
+            "Save member error:",
+            error
+        );
 
         alert(
             "Unable to save member.\n\n" +
@@ -741,53 +1459,107 @@ async function saveMember(event) {
 // EDIT MEMBER
 // ======================================================
 
-function editMember(id) {
+function editMember(
+    id
+) {
 
-    const member = allMembers.find(function (item) {
-        return Number(item.id) === Number(id);
-    });
+    if (!canManageMembers()) {
 
-    if (!member) {
-        alert("Member not found.");
+        alert(
+            "You do not have permission to edit members."
+        );
+
         return;
     }
 
+    const member =
+        allMembers.find(
+            function (item) {
 
-    const memberId = document.getElementById("memberId");
+                return (
+                    Number(item.id) ===
+                    Number(id)
+                );
+            }
+        );
 
-    const memberName = document.getElementById("memberName");
+    if (!member) {
 
-    const memberGender = document.getElementById("memberGender");
+        alert(
+            "Member not found."
+        );
 
-    const memberDob = document.getElementById("memberDob");
+        return;
+    }
 
-    const memberPhone = document.getElementById("memberPhone");
+    const memberId =
+        document.getElementById(
+            "memberId"
+        );
 
-    const memberAddress = document.getElementById("memberAddress");
+    const memberName =
+        document.getElementById(
+            "memberName"
+        );
+
+    const memberGender =
+        document.getElementById(
+            "memberGender"
+        );
+
+    const memberDob =
+        document.getElementById(
+            "memberDob"
+        );
+
+    const memberPhone =
+        document.getElementById(
+            "memberPhone"
+        );
+
+    const memberAddress =
+        document.getElementById(
+            "memberAddress"
+        );
 
     const memberDateJoined =
-        document.getElementById("memberDateJoined");
+        document.getElementById(
+            "memberDateJoined"
+        );
 
     const memberDepartment =
-        document.getElementById("memberDepartment");
+        document.getElementById(
+            "memberDepartment"
+        );
 
     const memberStatus =
-        document.getElementById("memberStatus");
-
+        document.getElementById(
+            "memberStatus"
+        );
 
     if (memberId) {
-        memberId.value = member.id;
+
+        memberId.value =
+            member.id;
     }
 
     if (memberName) {
-        memberName.value = getMemberName(member);
+
+        memberName.value =
+            getMemberName(
+                member
+            );
     }
 
     if (memberGender) {
-        memberGender.value = member.gender || "";
+
+        memberGender.value =
+            member.gender ||
+            "";
     }
 
     if (memberDob) {
+
         memberDob.value =
             member.dob ||
             member.date_of_birth ||
@@ -795,14 +1567,21 @@ function editMember(id) {
     }
 
     if (memberPhone) {
-        memberPhone.value = member.phone || "";
+
+        memberPhone.value =
+            member.phone ||
+            "";
     }
 
     if (memberAddress) {
-        memberAddress.value = member.address || "";
+
+        memberAddress.value =
+            member.address ||
+            "";
     }
 
     if (memberDateJoined) {
+
         memberDateJoined.value =
             member.date_joined ||
             member.membership_date ||
@@ -810,38 +1589,39 @@ function editMember(id) {
     }
 
     if (memberDepartment) {
-        memberDepartment.value = member.department || "";
+
+        memberDepartment.value =
+            member.department ||
+            "";
     }
 
     if (memberStatus) {
-        memberStatus.value = member.status || "Active";
+
+        memberStatus.value =
+            member.status ||
+            "Active";
     }
 
-
-    const submitButton = document.querySelector(
-        "#memberForm button[type='submit']"
-    );
+    const submitButton =
+        document.querySelector(
+            "#memberForm button[type='submit']"
+        );
 
     if (submitButton) {
-        submitButton.textContent = "Update Member";
-    }
 
+        submitButton.textContent =
+            "Update Member";
+    }
 
     const cancelButton =
-        document.getElementById("cancelMemberEdit");
+        document.getElementById(
+            "cancelMemberEdit"
+        );
 
     if (cancelButton) {
-        cancelButton.style.display = "inline-block";
-    }
 
-
-    const membersPage = document.getElementById("members");
-
-    if (membersPage) {
-        membersPage.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+        cancelButton.style.display =
+            "inline-block";
     }
 }
 
@@ -850,44 +1630,72 @@ function editMember(id) {
 // DELETE MEMBER
 // ======================================================
 
-async function deleteMember(id) {
+async function deleteMember(
+    id
+) {
 
-    const member = allMembers.find(function (item) {
-        return Number(item.id) === Number(id);
-    });
+    if (!canManageMembers()) {
+
+        alert(
+            "You do not have permission to delete members."
+        );
+
+        return;
+    }
+
+    const member =
+        allMembers.find(
+            function (item) {
+
+                return (
+                    Number(item.id) ===
+                    Number(id)
+                );
+            }
+        );
 
     if (!member) {
+
         return;
     }
 
-    const name = getMemberName(member);
+    const name =
+        getMemberName(
+            member
+        );
 
-    const confirmed = confirm(
-        `Are you sure you want to delete ${name}?`
-    );
+    const confirmed =
+        confirm(
+            `Are you sure you want to delete ${name}?`
+        );
 
     if (!confirmed) {
+
         return;
     }
-
 
     try {
 
         await getJSON(
             `${API_URL}/members/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
 
-
-        alert("Member deleted successfully.");
+        alert(
+            "Member deleted successfully."
+        );
 
         await loadMembers();
 
     } catch (error) {
 
-        console.error("Delete member error:", error);
+        console.error(
+            "Delete member error:",
+            error
+        );
 
         alert(
             "Unable to delete member.\n\n" +
@@ -905,11 +1713,15 @@ async function loadDepartments() {
 
     try {
 
-        const data = await getJSON(
-            `${API_URL}/departments`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/departments`
+            );
 
-        departments = Array.isArray(data) ? data : [];
+        departments =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderDepartments();
 
@@ -928,14 +1740,18 @@ async function loadDepartments() {
 function renderDepartments() {
 
     const list =
-        document.getElementById("departmentList");
+        document.getElementById(
+            "departmentList"
+        );
 
     if (!list) {
+
         return;
     }
 
-
-    if (departments.length === 0) {
+    if (
+        departments.length === 0
+    ) {
 
         list.innerHTML = `
             <div class="empty-state">
@@ -946,108 +1762,168 @@ function renderDepartments() {
         return;
     }
 
+    list.innerHTML =
+        departments.map(
+            function (department) {
 
-    list.innerHTML = departments.map(function (department) {
+                let deleteButton =
+                    "";
 
-        return `
-            <div class="department-card">
+                if (
+                    canManageDepartments()
+                ) {
 
-                <h3>
-                    ${escapeHTML(department.name)}
-                </h3>
+                    deleteButton = `
 
-                <p>
-                    ${escapeHTML(
-                        department.description || "No description"
-                    )}
-                </p>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteDepartment(${department.id})"
+                        >
+                            Delete
+                        </button>
 
-                <button
-                    type="button"
-                    class="delete-btn"
-                    onclick="deleteDepartment(${department.id})"
-                >
-                    Delete
-                </button>
+                    `;
+                }
 
-            </div>
-        `;
+                return `
+                    <div class="department-card">
 
-    }).join("");
+                        <h3>
+                            ${escapeHTML(
+                                department.name
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                department.description ||
+                                "No description"
+                            )}
+                        </p>
+
+                        ${deleteButton}
+
+                    </div>
+                `;
+
+            }
+        ).join("");
 }
 
 
 function updateDepartmentDropdown() {
 
     const dropdown =
-        document.getElementById("memberDepartment");
+        document.getElementById(
+            "memberDepartment"
+        );
 
     if (!dropdown) {
+
         return;
     }
 
-
-    const currentValue = dropdown.value;
-
+    const currentValue =
+        dropdown.value;
 
     dropdown.innerHTML = `
-        <option value="">Select Department</option>
-        ${departments.map(function (department) {
-            return `
-                <option value="${escapeHTML(department.name)}">
-                    ${escapeHTML(department.name)}
-                </option>
-            `;
-        }).join("")}
+        <option value="">
+            Select Department
+        </option>
+
+        ${departments.map(
+            function (department) {
+
+                return `
+                    <option value="${escapeHTML(
+                        department.name
+                    )}">
+                        ${escapeHTML(
+                            department.name
+                        )}
+                    </option>
+                `;
+
+            }
+        ).join("")}
     `;
 
-
     if (currentValue) {
-        dropdown.value = currentValue;
+
+        dropdown.value =
+            currentValue;
     }
 }
 
 
-async function saveDepartment(event) {
+async function saveDepartment(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageDepartments()) {
 
-    const name =
-        document.getElementById("departmentName")?.value.trim();
+        alert(
+            "You do not have permission to add departments."
+        );
 
-    const description =
-        document.getElementById("departmentDescription")?.value.trim();
-
-
-    if (!name) {
-        alert("Please enter a department name.");
         return;
     }
 
+    const name =
+        document.getElementById(
+            "departmentName"
+        )?.value.trim();
+
+    const description =
+        document.getElementById(
+            "departmentDescription"
+        )?.value.trim();
+
+    if (!name) {
+
+        alert(
+            "Please enter a department name."
+        );
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/departments`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
-                    name: name,
-                    description: description || null
-                })
+                body:
+                    JSON.stringify({
+
+                        name:
+                            name,
+
+                        description:
+                            description ||
+                            null
+                    })
             }
         );
 
+        alert(
+            "Department added successfully."
+        );
 
-        alert("Department added successfully.");
-
-        document.getElementById("departmentForm")?.reset();
+        document.getElementById(
+            "departmentForm"
+        )?.reset();
 
         await loadDepartments();
 
@@ -1066,28 +1942,42 @@ async function saveDepartment(event) {
 }
 
 
-async function deleteDepartment(id) {
+async function deleteDepartment(
+    id
+) {
 
-    const confirmed = confirm(
-        "Are you sure you want to delete this department?"
-    );
+    if (!canManageDepartments()) {
 
-    if (!confirmed) {
+        alert(
+            "You do not have permission to delete departments."
+        );
+
         return;
     }
 
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this department?"
+        );
+
+    if (!confirmed) {
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/departments/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
 
-
-        alert("Department deleted successfully.");
+        alert(
+            "Department deleted successfully."
+        );
 
         await loadDepartments();
 
@@ -1114,11 +2004,15 @@ async function loadAttendance() {
 
     try {
 
-        const data = await getJSON(
-            `${API_URL}/attendance`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/attendance`
+            );
 
-        allAttendance = Array.isArray(data) ? data : [];
+        allAttendance =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderAttendance();
 
@@ -1134,7 +2028,9 @@ async function loadAttendance() {
         );
 
         const list =
-            document.getElementById("attendanceList");
+            document.getElementById(
+                "attendanceList"
+            );
 
         if (list) {
 
@@ -1153,35 +2049,44 @@ async function loadAttendance() {
 function updateMemberDropdown() {
 
     const dropdown =
-        document.getElementById("attendanceMember");
+        document.getElementById(
+            "attendanceMember"
+        );
 
     if (!dropdown) {
+
         return;
     }
 
-
-    const currentValue = dropdown.value;
-
+    const currentValue =
+        dropdown.value;
 
     dropdown.innerHTML = `
         <option value="">
             Select Member
         </option>
 
-        ${allMembers.map(function (member) {
+        ${allMembers.map(
+            function (member) {
 
-            return `
-                <option value="${member.id}">
-                    ${escapeHTML(getMemberName(member))}
-                </option>
-            `;
+                return `
+                    <option value="${member.id}">
+                        ${escapeHTML(
+                            getMemberName(
+                                member
+                            )
+                        )}
+                    </option>
+                `;
 
-        }).join("")}
+            }
+        ).join("")}
     `;
 
-
     if (currentValue) {
-        dropdown.value = currentValue;
+
+        dropdown.value =
+            currentValue;
     }
 }
 
@@ -1189,14 +2094,18 @@ function updateMemberDropdown() {
 function renderAttendance() {
 
     const list =
-        document.getElementById("attendanceList");
+        document.getElementById(
+            "attendanceList"
+        );
 
     if (!list) {
+
         return;
     }
 
-
-    if (allAttendance.length === 0) {
+    if (
+        allAttendance.length === 0
+    ) {
 
         list.innerHTML = `
             <tr>
@@ -1209,145 +2118,205 @@ function renderAttendance() {
         return;
     }
 
+    list.innerHTML =
+        allAttendance.map(
+            function (record) {
 
-    list.innerHTML = allAttendance.map(function (record) {
+                const member =
+                    allMembers.find(
+                        function (item) {
 
-        const member = allMembers.find(function (item) {
+                            return (
+                                Number(item.id) ===
+                                Number(
+                                    record.member_id
+                                )
+                            );
 
-            return Number(item.id) ===
-                Number(record.member_id);
+                        }
+                    );
 
-        });
+                const memberName =
+                    member
+                        ? getMemberName(
+                            member
+                        )
+                        : `Member ${record.member_id}`;
 
+                let action =
+                    "";
 
-        const memberName =
-            member
-                ? getMemberName(member)
-                : `Member ${record.member_id}`;
+                if (
+                    canManageAttendance()
+                ) {
 
+                    action = `
 
-        return `
-            <tr>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteAttendance(${record.id})"
+                        >
+                            Delete
+                        </button>
 
-                <td>
-                    ${escapeHTML(record.id)}
-                </td>
+                    `;
+                }
 
-                <td>
-                    MEM-${escapeHTML(record.member_id)}
-                    <br>
-                    <small>
-                        ${escapeHTML(memberName)}
-                    </small>
-                </td>
+                return `
+                    <tr>
 
-                <td>
-                    ${formatDate(record.attendance_date)}
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                record.id
+                            )}
+                        </td>
 
-                <td>
-                    <span class="status-badge">
-                        ${escapeHTML(record.status)}
-                    </span>
-                </td>
+                        <td>
+                            MEM-${escapeHTML(
+                                record.member_id
+                            )}
 
-                <td>
+                            <br>
 
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        onclick="deleteAttendance(${record.id})"
-                    >
-                        Delete
-                    </button>
+                            <small>
+                                ${escapeHTML(
+                                    memberName
+                                )}
+                            </small>
+                        </td>
 
-                </td>
+                        <td>
+                            ${formatDate(
+                                record.attendance_date
+                            )}
+                        </td>
 
-            </tr>
-        `;
+                        <td>
+                            <span class="status-badge">
+                                ${escapeHTML(
+                                    record.status
+                                )}
+                            </span>
+                        </td>
 
-    }).join("");
+                        <td>
+                            ${action}
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+        ).join("");
 }
 
 
-// ======================================================
-// SAVE ATTENDANCE
-// ======================================================
-
-async function saveAttendance(event) {
+async function saveAttendance(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageAttendance()) {
+
+        alert(
+            "You do not have permission to record attendance."
+        );
+
+        return;
+    }
 
     const memberId =
-        document.getElementById("attendanceMember")?.value;
+        document.getElementById(
+            "attendanceMember"
+        )?.value;
 
     const attendanceDate =
-        document.getElementById("attendanceDate")?.value;
+        document.getElementById(
+            "attendanceDate"
+        )?.value;
 
     const status =
-        document.getElementById("attendanceStatus")?.value;
-
+        document.getElementById(
+            "attendanceStatus"
+        )?.value;
 
     if (!memberId) {
-        alert("Please select a member.");
+
+        alert(
+            "Please select a member."
+        );
+
         return;
     }
-
 
     if (!attendanceDate) {
-        alert("Please select a date.");
+
+        alert(
+            "Please select a date."
+        );
+
         return;
     }
-
 
     if (!status) {
-        alert("Please select attendance status.");
+
+        alert(
+            "Please select attendance status."
+        );
+
         return;
     }
-
 
     try {
 
         await getJSON(
             `${API_URL}/attendance`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
+                body:
+                    JSON.stringify({
 
-                    member_id: Number(memberId),
+                        member_id:
+                            Number(
+                                memberId
+                            ),
 
-                    attendance_date: attendanceDate,
+                        attendance_date:
+                            attendanceDate,
 
-                    status: status
-
-                })
+                        status:
+                            status
+                    })
             }
         );
-
 
         alert(
             "Attendance recorded successfully."
         );
 
-
         document.getElementById(
             "attendanceForm"
         )?.reset();
 
-
         const dateInput =
-            document.getElementById("attendanceDate");
+            document.getElementById(
+                "attendanceDate"
+            );
 
         if (dateInput) {
-            dateInput.value = getTodayISO();
-        }
 
+            dateInput.value =
+                getTodayISO();
+        }
 
         await loadAttendance();
 
@@ -1366,35 +2335,42 @@ async function saveAttendance(event) {
 }
 
 
-// ======================================================
-// DELETE ATTENDANCE
-// ======================================================
+async function deleteAttendance(
+    id
+) {
 
-async function deleteAttendance(id) {
+    if (!canManageAttendance()) {
 
-    const confirmed = confirm(
-        "Are you sure you want to delete this attendance record?"
-    );
+        alert(
+            "You do not have permission to delete attendance records."
+        );
 
-    if (!confirmed) {
         return;
     }
 
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this attendance record?"
+        );
+
+    if (!confirmed) {
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/attendance/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
-
 
         alert(
             "Attendance record deleted."
         );
-
 
         await loadAttendance();
 
@@ -1430,11 +2406,15 @@ async function loadEvents() {
 
     try {
 
-        const data = await getJSON(
-            `${API_URL}/events`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/events`
+            );
 
-        allEvents = Array.isArray(data) ? data : [];
+        allEvents =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderEvents();
 
@@ -1448,7 +2428,9 @@ async function loadEvents() {
         );
 
         const list =
-            document.getElementById("eventList");
+            document.getElementById(
+                "eventList"
+            );
 
         if (list) {
 
@@ -1462,17 +2444,25 @@ async function loadEvents() {
 }
 
 
+// ======================================================
+// RENDER EVENTS
+// ======================================================
+
 function renderEvents() {
 
     const list =
-        document.getElementById("eventList");
+        document.getElementById(
+            "eventList"
+        );
 
     if (!list) {
+
         return;
     }
 
-
-    if (allEvents.length === 0) {
+    if (
+        allEvents.length === 0
+    ) {
 
         list.innerHTML = `
             <div class="empty-state">
@@ -1483,49 +2473,74 @@ function renderEvents() {
         return;
     }
 
+    list.innerHTML =
+        allEvents.map(
+            function (event) {
 
-    list.innerHTML = allEvents.map(function (event) {
+                let deleteButton =
+                    "";
 
-        return `
-            <div class="event-card">
+                if (
+                    canManageEvents()
+                ) {
 
-                <h3>
-                    ${escapeHTML(event.title)}
-                </h3>
+                    deleteButton = `
 
-                <p>
-                    <strong>Date:</strong>
-                    ${formatDate(event.date)}
-                </p>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteEvent(${event.id})"
+                        >
+                            Delete
+                        </button>
 
-                <p>
-                    <strong>Time:</strong>
-                    ${formatTime(event.time)}
-                </p>
+                    `;
+                }
 
-                <p>
-                    <strong>Venue:</strong>
-                    ${escapeHTML(event.venue)}
-                </p>
+                return `
+                    <div class="event-card">
 
-                <p>
-                    ${escapeHTML(
-                        event.description || ""
-                    )}
-                </p>
+                        <h3>
+                            ${escapeHTML(
+                                event.title
+                            )}
+                        </h3>
 
-                <button
-                    type="button"
-                    class="delete-btn"
-                    onclick="deleteEvent(${event.id})"
-                >
-                    Delete
-                </button>
+                        <p>
+                            <strong>Date:</strong>
+                            ${formatDate(
+                                event.date
+                            )}
+                        </p>
 
-            </div>
-        `;
+                        <p>
+                            <strong>Time:</strong>
+                            ${formatTime(
+                                event.time
+                            )}
+                        </p>
 
-    }).join("");
+                        <p>
+                            <strong>Venue:</strong>
+                            ${escapeHTML(
+                                event.venue
+                            )}
+                        </p>
+
+                        <p>
+                            ${escapeHTML(
+                                event.description ||
+                                ""
+                            )}
+                        </p>
+
+                        ${deleteButton}
+
+                    </div>
+                `;
+
+            }
+        ).join("");
 }
 
 
@@ -1533,83 +2548,124 @@ function renderEvents() {
 // SAVE EVENT
 // ======================================================
 
-async function saveEvent(event) {
+async function saveEvent(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageEvents()) {
+
+        alert(
+            "You do not have permission to add events."
+        );
+
+        return;
+    }
 
     const title =
-        document.getElementById("eventTitle")?.value.trim();
+        document.getElementById(
+            "eventTitle"
+        )?.value.trim();
 
     const date =
-        document.getElementById("eventDate")?.value;
+        document.getElementById(
+            "eventDate"
+        )?.value;
 
     const time =
-        document.getElementById("eventTime")?.value;
+        document.getElementById(
+            "eventTime"
+        )?.value;
 
     const venue =
-        document.getElementById("eventVenue")?.value.trim();
+        document.getElementById(
+            "eventVenue"
+        )?.value.trim();
 
     const description =
-        document.getElementById("eventDescription")?.value.trim();
-
+        document.getElementById(
+            "eventDescription"
+        )?.value.trim();
 
     if (!title) {
-        alert("Please enter the event title.");
+
+        alert(
+            "Please enter the event title."
+        );
+
         return;
     }
 
     if (!date) {
-        alert("Please select the event date.");
+
+        alert(
+            "Please select the event date."
+        );
+
         return;
     }
 
     if (!time) {
-        alert("Please select the event time.");
+
+        alert(
+            "Please select the event time."
+        );
+
         return;
     }
 
     if (!venue) {
-        alert("Please enter the venue.");
+
+        alert(
+            "Please enter the venue."
+        );
+
         return;
     }
-
 
     try {
 
         await getJSON(
             `${API_URL}/events`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
+                body:
+                    JSON.stringify({
 
-                    title: title,
+                        title:
+                            title,
 
-                    date: date,
+                        date:
+                            date,
 
-                    time: time,
+                        time:
+                            time,
 
-                    venue: venue,
+                        venue:
+                            venue,
 
-                    description: description || null
-
-                })
+                        description:
+                            description ||
+                            null
+                    })
             }
         );
 
-
-        alert("Event added successfully.");
-
+        alert(
+            "Event added successfully."
+        );
 
         document.getElementById(
             "eventForm"
         )?.reset();
-
 
         await loadEvents();
 
@@ -1632,28 +2688,42 @@ async function saveEvent(event) {
 // DELETE EVENT
 // ======================================================
 
-async function deleteEvent(id) {
+async function deleteEvent(
+    id
+) {
 
-    const confirmed = confirm(
-        "Are you sure you want to delete this event?"
-    );
+    if (!canManageEvents()) {
 
-    if (!confirmed) {
+        alert(
+            "You do not have permission to delete events."
+        );
+
         return;
     }
 
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this event?"
+        );
+
+    if (!confirmed) {
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/events/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
 
-
-        alert("Event deleted successfully.");
+        alert(
+            "Event deleted successfully."
+        );
 
         await loadEvents();
 
@@ -1680,13 +2750,15 @@ async function loadOfferings() {
 
     try {
 
-        const data = await getJSON(
-            `${API_URL}/offerings`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/offerings`
+            );
 
-        allOfferings = Array.isArray(data)
-            ? data
-            : [];
+        allOfferings =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderOfferings();
 
@@ -1698,7 +2770,9 @@ async function loadOfferings() {
         );
 
         const list =
-            document.getElementById("offeringList");
+            document.getElementById(
+                "offeringList"
+            );
 
         if (list) {
 
@@ -1714,17 +2788,25 @@ async function loadOfferings() {
 }
 
 
+// ======================================================
+// RENDER OFFERINGS
+// ======================================================
+
 function renderOfferings() {
 
     const list =
-        document.getElementById("offeringList");
+        document.getElementById(
+            "offeringList"
+        );
 
     if (!list) {
+
         return;
     }
 
-
-    if (allOfferings.length === 0) {
+    if (
+        allOfferings.length === 0
+    ) {
 
         list.innerHTML = `
             <tr>
@@ -1737,50 +2819,73 @@ function renderOfferings() {
         return;
     }
 
+    list.innerHTML =
+        allOfferings.map(
+            function (offering) {
 
-    list.innerHTML = allOfferings.map(function (offering) {
+                let deleteButton =
+                    "";
 
-        return `
-            <tr>
+                if (
+                    canManageOfferings()
+                ) {
 
-                <td>
-                    ${escapeHTML(offering.id)}
-                </td>
+                    deleteButton = `
 
-                <td>
-                    ${formatDate(offering.date)}
-                </td>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            onclick="deleteOffering(${offering.id})"
+                        >
+                            Delete
+                        </button>
 
-                <td>
-                    GH₵ ${escapeHTML(offering.amount)}
-                </td>
+                    `;
+                }
 
-                <td>
-                    ${escapeHTML(offering.category)}
-                </td>
+                return `
+                    <tr>
 
-                <td>
-                    ${escapeHTML(
-                        offering.description || "-"
-                    )}
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                offering.id
+                            )}
+                        </td>
 
-                <td>
+                        <td>
+                            ${formatDate(
+                                offering.date
+                            )}
+                        </td>
 
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        onclick="deleteOffering(${offering.id})"
-                    >
-                        Delete
-                    </button>
+                        <td>
+                            GH₵ ${escapeHTML(
+                                offering.amount
+                            )}
+                        </td>
 
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                offering.category
+                            )}
+                        </td>
 
-            </tr>
-        `;
+                        <td>
+                            ${escapeHTML(
+                                offering.description ||
+                                "-"
+                            )}
+                        </td>
 
-    }).join("");
+                        <td>
+                            ${deleteButton}
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+        ).join("");
 }
 
 
@@ -1788,75 +2893,107 @@ function renderOfferings() {
 // SAVE OFFERING
 // ======================================================
 
-async function saveOffering(event) {
+async function saveOffering(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageOfferings()) {
+
+        alert(
+            "You do not have permission to record offerings."
+        );
+
+        return;
+    }
 
     const date =
-        document.getElementById("offeringDate")?.value;
+        document.getElementById(
+            "offeringDate"
+        )?.value;
 
     const amount =
-        document.getElementById("offeringAmount")?.value.trim();
+        document.getElementById(
+            "offeringAmount"
+        )?.value.trim();
 
     const category =
-        document.getElementById("offeringCategory")?.value;
+        document.getElementById(
+            "offeringCategory"
+        )?.value;
 
     const description =
-        document.getElementById("offeringDescription")?.value.trim();
-
+        document.getElementById(
+            "offeringDescription"
+        )?.value.trim();
 
     if (!date) {
-        alert("Please select the date.");
+
+        alert(
+            "Please select the date."
+        );
+
         return;
     }
 
     if (!amount) {
-        alert("Please enter the amount.");
+
+        alert(
+            "Please enter the amount."
+        );
+
         return;
     }
 
     if (!category) {
-        alert("Please select a category.");
+
+        alert(
+            "Please select a category."
+        );
+
         return;
     }
-
 
     try {
 
         await getJSON(
             `${API_URL}/offerings`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
+                body:
+                    JSON.stringify({
 
-                    date: date,
+                        date:
+                            date,
 
-                    amount: amount,
+                        amount:
+                            amount,
 
-                    category: category,
+                        category:
+                            category,
 
-                    description: description || null
-
-                })
+                        description:
+                            description ||
+                            null
+                    })
             }
         );
-
 
         alert(
             "Offering recorded successfully."
         );
 
-
         document.getElementById(
             "offeringForm"
         )?.reset();
-
 
         await loadOfferings();
 
@@ -1879,31 +3016,42 @@ async function saveOffering(event) {
 // DELETE OFFERING
 // ======================================================
 
-async function deleteOffering(id) {
+async function deleteOffering(
+    id
+) {
 
-    const confirmed = confirm(
-        "Are you sure you want to delete this offering?"
-    );
+    if (!canManageOfferings()) {
 
-    if (!confirmed) {
+        alert(
+            "You do not have permission to delete offerings."
+        );
+
         return;
     }
 
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this offering?"
+        );
+
+    if (!confirmed) {
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/offerings/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
-
 
         alert(
             "Offering deleted successfully."
         );
-
 
         await loadOfferings();
 
@@ -1928,13 +3076,24 @@ async function deleteOffering(id) {
 
 async function loadUsers() {
 
+    if (!canManageUsers()) {
+
+        allUsers = [];
+
+        return;
+    }
+
     try {
 
-        const data = await getJSON(
-            `${API_URL}/users`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/users`
+            );
 
-        allUsers = Array.isArray(data) ? data : [];
+        allUsers =
+            Array.isArray(data)
+                ? data
+                : [];
 
         renderUsers();
 
@@ -1946,7 +3105,9 @@ async function loadUsers() {
         );
 
         const list =
-            document.getElementById("userList");
+            document.getElementById(
+                "userList"
+            );
 
         if (list) {
 
@@ -1962,17 +3123,25 @@ async function loadUsers() {
 }
 
 
+// ======================================================
+// RENDER USERS
+// ======================================================
+
 function renderUsers() {
 
     const list =
-        document.getElementById("userList");
+        document.getElementById(
+            "userList"
+        );
 
     if (!list) {
+
         return;
     }
 
-
-    if (allUsers.length === 0) {
+    if (
+        allUsers.length === 0
+    ) {
 
         list.innerHTML = `
             <tr>
@@ -1985,44 +3154,54 @@ function renderUsers() {
         return;
     }
 
+    list.innerHTML =
+        allUsers.map(
+            function (user) {
 
-    list.innerHTML = allUsers.map(function (user) {
+                return `
+                    <tr>
 
-        return `
-            <tr>
+                        <td>
+                            ${escapeHTML(
+                                user.id
+                            )}
+                        </td>
 
-                <td>
-                    ${escapeHTML(user.id)}
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                user.username
+                            )}
+                        </td>
 
-                <td>
-                    ${escapeHTML(user.username)}
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                user.email
+                            )}
+                        </td>
 
-                <td>
-                    ${escapeHTML(user.email)}
-                </td>
+                        <td>
+                            ${escapeHTML(
+                                user.role
+                            )}
+                        </td>
 
-                <td>
-                    ${escapeHTML(user.role)}
-                </td>
+                        <td>
 
-                <td>
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                onclick="deleteUser(${user.id})"
+                            >
+                                Delete
+                            </button>
 
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        onclick="deleteUser(${user.id})"
-                    >
-                        Delete
-                    </button>
+                        </td>
 
-                </td>
+                    </tr>
+                `;
 
-            </tr>
-        `;
-
-    }).join("");
+            }
+        ).join("");
 }
 
 
@@ -2030,78 +3209,117 @@ function renderUsers() {
 // SAVE USER
 // ======================================================
 
-async function saveUser(event) {
+async function saveUser(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageUsers()) {
+
+        alert(
+            "You do not have permission to create users."
+        );
+
+        return;
+    }
 
     const username =
-        document.getElementById("userName")?.value.trim();
+        document.getElementById(
+            "userName"
+        )?.value.trim();
 
     const email =
-        document.getElementById("userEmail")?.value.trim();
+        document.getElementById(
+            "userEmail"
+        )?.value.trim();
 
     const password =
-        document.getElementById("userPassword")?.value;
+        document.getElementById(
+            "userPassword"
+        )?.value;
 
     const role =
-        document.getElementById("userRole")?.value;
-
+        document.getElementById(
+            "userRole"
+        )?.value;
 
     if (!username) {
-        alert("Please enter a username.");
+
+        alert(
+            "Please enter a username."
+        );
+
         return;
     }
 
     if (!email) {
-        alert("Please enter an email.");
+
+        alert(
+            "Please enter an email."
+        );
+
         return;
     }
 
     if (!password) {
-        alert("Please enter a password.");
+
+        alert(
+            "Please enter a password."
+        );
+
         return;
     }
 
     if (!role) {
-        alert("Please select a role.");
+
+        alert(
+            "Please select a role."
+        );
+
         return;
     }
-
 
     try {
 
         await getJSON(
             `${API_URL}/users`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
+                body:
+                    JSON.stringify({
 
-                    username: username,
+                        username:
+                            username,
 
-                    email: email,
+                        email:
+                            email,
 
-                    password: password,
+                        password:
+                            password,
 
-                    role: normalizeRole(role)
-
-                })
+                        role:
+                            normalizeRole(
+                                role
+                            )
+                    })
             }
         );
 
-
-        alert("User created successfully.");
-
+        alert(
+            "User created successfully."
+        );
 
         document.getElementById(
             "userForm"
         )?.reset();
-
 
         await loadUsers();
 
@@ -2124,28 +3342,42 @@ async function saveUser(event) {
 // DELETE USER
 // ======================================================
 
-async function deleteUser(id) {
+async function deleteUser(
+    id
+) {
 
-    const confirmed = confirm(
-        "Are you sure you want to delete this user?"
-    );
+    if (!canManageUsers()) {
 
-    if (!confirmed) {
+        alert(
+            "You do not have permission to delete users."
+        );
+
         return;
     }
 
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this user?"
+        );
+
+    if (!confirmed) {
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/users/${id}`,
             {
-                method: "DELETE"
+                method:
+                    "DELETE"
             }
         );
 
-
-        alert("User deleted successfully.");
+        alert(
+            "User deleted successfully."
+        );
 
         await loadUsers();
 
@@ -2170,22 +3402,40 @@ async function deleteUser(id) {
 
 async function loadSettings() {
 
+    if (!canManageSettings()) {
+
+        return;
+    }
+
     try {
 
-        const data = await getJSON(
-            `${API_URL}/settings`
-        );
+        const data =
+            await getJSON(
+                `${API_URL}/settings`
+            );
 
+        if (
+            Array.isArray(data)
+        ) {
 
-        if (Array.isArray(data)) {
+            if (
+                data.length > 0
+            ) {
 
-            if (data.length > 0) {
-                fillSettings(data[0]);
+                fillSettings(
+                    data[0]
+                );
             }
 
-        } else if (data && typeof data === "object") {
+        } else if (
+            data &&
+            typeof data ===
+                "object"
+        ) {
 
-            fillSettings(data);
+            fillSettings(
+                data
+            );
         }
 
     } catch (error) {
@@ -2198,24 +3448,36 @@ async function loadSettings() {
 }
 
 
-function fillSettings(settings) {
+// ======================================================
+// FILL SETTINGS
+// ======================================================
+
+function fillSettings(
+    settings
+) {
 
     const systemName =
-        document.getElementById("systemName");
+        document.getElementById(
+            "systemName"
+        );
 
     const systemTheme =
-        document.getElementById("systemTheme");
-
+        document.getElementById(
+            "systemTheme"
+        );
 
     if (systemName) {
+
         systemName.value =
-            settings.system_name || "ChurchFlow CMS";
+            settings.system_name ||
+            "ChurchFlow CMS";
     }
 
-
     if (systemTheme) {
+
         systemTheme.value =
-            settings.theme || "light";
+            settings.theme ||
+            "light";
     }
 }
 
@@ -2224,50 +3486,69 @@ function fillSettings(settings) {
 // SAVE SETTINGS
 // ======================================================
 
-async function saveSettings(event) {
+async function saveSettings(
+    event
+) {
 
     event.preventDefault();
 
+    if (!canManageSettings()) {
 
-    const systemName =
-        document.getElementById("systemName")?.value.trim();
+        alert(
+            "You do not have permission to change settings."
+        );
 
-    const theme =
-        document.getElementById("systemTheme")?.value;
-
-
-    if (!systemName) {
-        alert("Please enter the system name.");
         return;
     }
 
+    const systemName =
+        document.getElementById(
+            "systemName"
+        )?.value.trim();
+
+    const theme =
+        document.getElementById(
+            "systemTheme"
+        )?.value;
+
+    if (!systemName) {
+
+        alert(
+            "Please enter the system name."
+        );
+
+        return;
+    }
 
     try {
 
         await getJSON(
             `${API_URL}/settings`,
             {
-                method: "POST",
+                method:
+                    "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/json"
                 },
 
-                body: JSON.stringify({
+                body:
+                    JSON.stringify({
 
-                    system_name: systemName,
+                        system_name:
+                            systemName,
 
-                    theme: theme || "light"
-
-                })
+                        theme:
+                            theme ||
+                            "light"
+                    })
             }
         );
-
 
         alert(
             "Settings saved successfully."
         );
-
 
         await loadSettings();
 
@@ -2290,61 +3571,61 @@ async function saveSettings(event) {
 // DASHBOARD
 // ======================================================
 
-function updateDashboardStats() {
+async function updateDashboardStats() {
 
-    const total =
-        allMembers.length;
+    try {
 
+        const response = await fetch(
+            `${API_URL}/dashboard`
+        );
 
-    const male =
-        allMembers.filter(function (member) {
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load dashboard statistics."
+            );
+        }
 
-            return String(member.gender || "")
-                .toLowerCase() === "male";
+        const data =
+            await response.json();
 
-        }).length;
+        setText(
+            "totalMembers",
+            data.total_members
+        );
 
+        setText(
+            "maleMembers",
+            data.male_members
+        );
 
-    const female =
-        allMembers.filter(function (member) {
+        setText(
+            "femaleMembers",
+            data.female_members
+        );
 
-            return String(member.gender || "")
-                .toLowerCase() === "female";
+        setText(
+            "activeMembers",
+            data.active_members
+        );
 
-        }).length;
+        setText(
+            "todayAttendance",
+            data.today_attendance
+        );
 
+        setText(
+            "upcomingEvents",
+            data.upcoming_events
+        );
 
-    const active =
-        allMembers.filter(function (member) {
+    } catch (error) {
 
-            return String(member.status || "Active")
-                .toLowerCase() === "active";
+        console.error(
+            "Dashboard API error:",
+            error
+        );
 
-        }).length;
-
-
-    setText(
-        "totalMembers",
-        total
-    );
-
-
-    setText(
-        "maleMembers",
-        male
-    );
-
-
-    setText(
-        "femaleMembers",
-        female
-    );
-
-
-    setText(
-        "activeMembers",
-        active
-    );
+    }
 }
 
 
@@ -2357,70 +3638,82 @@ function updateAttendanceDashboard() {
     const today =
         getTodayISO();
 
-
     const todayRecords =
-        allAttendance.filter(function (record) {
+        allAttendance.filter(
+            function (record) {
 
-            return record.attendance_date === today;
+                return (
+                    record.attendance_date ===
+                    today
+                );
 
-        });
-
+            }
+        );
 
     const present =
-        todayRecords.filter(function (record) {
+        todayRecords.filter(
+            function (record) {
 
-            return String(record.status || "")
-                .toLowerCase() === "present";
+                return (
+                    String(
+                        record.status ||
+                        ""
+                    ).toLowerCase() ===
+                    "present"
+                );
 
-        }).length;
-
+            }
+        ).length;
 
     const absent =
-        todayRecords.filter(function (record) {
+        todayRecords.filter(
+            function (record) {
 
-            return String(record.status || "")
-                .toLowerCase() === "absent";
+                return (
+                    String(
+                        record.status ||
+                        ""
+                    ).toLowerCase() ===
+                    "absent"
+                );
 
-        }).length;
-
+            }
+        ).length;
 
     const total =
         todayRecords.length;
 
-
     const percentage =
         total > 0
-            ? Math.round((present / total) * 100)
+            ? Math.round(
+                (present / total) * 100
+            )
             : 0;
-
 
     setText(
         "attendancePercentage",
         `${percentage}%`
     );
 
-
     setText(
         "presentCount",
         present
     );
-
 
     setText(
         "absentCount",
         absent
     );
 
-
     setText(
         "attendanceTotal",
         total
     );
 
-
     const circle =
-        document.getElementById("attendanceCircle");
-
+        document.getElementById(
+            "attendanceCircle"
+        );
 
     if (circle) {
 
@@ -2439,24 +3732,37 @@ function updateAttendanceDashboard() {
 function renderRecentMembers() {
 
     const container =
-        document.getElementById("recentMembers");
+        document.getElementById(
+            "recentMembers"
+        );
 
     if (!container) {
+
         return;
     }
 
-
     const recentMembers =
         [...allMembers]
-            .sort(function (a, b) {
 
-                return Number(b.id) - Number(a.id);
+            .sort(
+                function (a, b) {
 
-            })
-            .slice(0, 5);
+                    return (
+                        Number(b.id) -
+                        Number(a.id)
+                    );
 
+                }
+            )
 
-    if (recentMembers.length === 0) {
+            .slice(
+                0,
+                5
+            );
+
+    if (
+        recentMembers.length === 0
+    ) {
 
         container.innerHTML = `
             <p>
@@ -2467,38 +3773,43 @@ function renderRecentMembers() {
         return;
     }
 
-
     container.innerHTML =
-        recentMembers.map(function (member) {
+        recentMembers.map(
+            function (member) {
 
-            return `
-                <div class="recent-member">
+                return `
+                    <div class="recent-member">
 
-                    <div>
+                        <div>
 
-                        <strong>
-                            ${escapeHTML(
-                                getMemberName(member)
+                            <strong>
+                                ${escapeHTML(
+                                    getMemberName(
+                                        member
+                                    )
+                                )}
+                            </strong>
+
+                            <small>
+                                MEM-${escapeHTML(
+                                    member.id
+                                )}
+                            </small>
+
+                        </div>
+
+                        <span>
+                            ${formatDate(
+                                member.date_joined ||
+                                member.membership_date
                             )}
-                        </strong>
-
-                        <small>
-                            MEM-${escapeHTML(member.id)}
-                        </small>
+                        </span>
 
                     </div>
+                `;
 
-                    <span>
-                        ${formatDate(
-                            member.date_joined ||
-                            member.membership_date
-                        )}
-                    </span>
-
-                </div>
-            `;
-
-        }).join("");
+            }
+        ).join("");
 }
 
 
@@ -2509,34 +3820,54 @@ function renderRecentMembers() {
 function renderDashboardEvents() {
 
     const container =
-        document.getElementById("dashboardEvents");
+        document.getElementById(
+            "dashboardEvents"
+        );
 
     if (!container) {
+
         return;
     }
-
 
     const today =
         getTodayISO();
 
-
     const upcomingEvents =
         allEvents
-            .filter(function (event) {
 
-                return event.date >= today;
+            .filter(
+                function (event) {
 
-            })
-            .sort(function (a, b) {
+                    return (
+                        event.date >=
+                        today
+                    );
 
-                return String(a.date)
-                    .localeCompare(String(b.date));
+                }
+            )
 
-            })
-            .slice(0, 5);
+            .sort(
+                function (a, b) {
 
+                    return String(
+                        a.date
+                    ).localeCompare(
+                        String(
+                            b.date
+                        )
+                    );
 
-    if (upcomingEvents.length === 0) {
+                }
+            )
+
+            .slice(
+                0,
+                5
+            );
+
+    if (
+        upcomingEvents.length === 0
+    ) {
 
         container.innerHTML = `
             <p>
@@ -2547,35 +3878,44 @@ function renderDashboardEvents() {
         return;
     }
 
-
     container.innerHTML =
-        upcomingEvents.map(function (event) {
+        upcomingEvents.map(
+            function (event) {
 
-            return `
-                <div class="dashboard-event">
+                return `
+                    <div class="dashboard-event">
 
-                    <div>
+                        <div>
 
-                        <strong>
-                            ${escapeHTML(event.title)}
-                        </strong>
+                            <strong>
+                                ${escapeHTML(
+                                    event.title
+                                )}
+                            </strong>
 
-                        <small>
-                            ${formatDate(event.date)}
-                            •
-                            ${formatTime(event.time)}
-                        </small>
+                            <small>
+                                ${formatDate(
+                                    event.date
+                                )}
+                                •
+                                ${formatTime(
+                                    event.time
+                                )}
+                            </small>
+
+                        </div>
+
+                        <span>
+                            ${escapeHTML(
+                                event.venue
+                            )}
+                        </span>
 
                     </div>
+                `;
 
-                    <span>
-                        ${escapeHTML(event.venue)}
-                    </span>
-
-                </div>
-            `;
-
-        }).join("");
+            }
+        ).join("");
 }
 
 
@@ -2594,37 +3934,45 @@ function getBirthdayMembers() {
     const todayDay =
         today.getDate();
 
+    return allMembers.filter(
+        function (member) {
 
-    return allMembers.filter(function (member) {
+            const birthday =
+                member.dob ||
+                member.date_of_birth;
 
-        const birthday =
-            member.dob ||
-            member.date_of_birth;
+            if (!birthday) {
 
+                return false;
+            }
 
-        if (!birthday) {
-            return false;
+            const date =
+                new Date(
+                    birthday
+                );
+
+            return (
+
+                date.getMonth() + 1 ===
+                    todayMonth &&
+
+                date.getDate() ===
+                    todayDay
+            );
+
         }
-
-
-        const date =
-            new Date(birthday);
-
-
-        return (
-            date.getMonth() + 1 === todayMonth &&
-            date.getDate() === todayDay
-        );
-
-    });
+    );
 }
 
 
-function birthdayMessage(member) {
+function birthdayMessage(
+    member
+) {
 
     const name =
-        getMemberName(member);
-
+        getMemberName(
+            member
+        );
 
     return `Happy Birthday ${name}! 🎉 Wishing you a blessed birthday filled with joy, peace and God's abundant blessings.`;
 }
@@ -2633,18 +3981,21 @@ function birthdayMessage(member) {
 function renderBirthdays() {
 
     const container =
-        document.getElementById("birthdayList");
+        document.getElementById(
+            "birthdayList"
+        );
 
     if (!container) {
+
         return;
     }
-
 
     const birthdays =
         getBirthdayMembers();
 
-
-    if (birthdays.length === 0) {
+    if (
+        birthdays.length === 0
+    ) {
 
         container.innerHTML = `
             <div class="empty-state">
@@ -2655,81 +4006,89 @@ function renderBirthdays() {
         return;
     }
 
-
     container.innerHTML =
-        birthdays.map(function (member) {
+        birthdays.map(
+            function (member) {
 
-            const name =
-                getMemberName(member);
+                const name =
+                    getMemberName(
+                        member
+                    );
 
+                return `
+                    <div class="birthday-card">
 
-            return `
-                <div class="birthday-card">
+                        <div class="birthday-info">
 
-                    <div class="birthday-info">
+                            <div class="birthday-avatar">
+                                🎂
+                            </div>
 
-                        <div class="birthday-avatar">
-                            🎂
+                            <div>
+
+                                <div class="birthday-name">
+                                    ${escapeHTML(
+                                        name
+                                    )}
+                                </div>
+
+                                <div class="birthday-message">
+                                    ${escapeHTML(
+                                        birthdayMessage(
+                                            member
+                                        )
+                                    )}
+                                </div>
+
+                            </div>
+
                         </div>
 
-                        <div>
+                        <div class="birthday-actions">
 
-                            <div class="birthday-name">
-                                ${escapeHTML(name)}
-                            </div>
-
-                            <div class="birthday-message">
-                                ${escapeHTML(
-                                    birthdayMessage(member)
-                                )}
-                            </div>
+                            <button
+                                type="button"
+                                class="birthday-button"
+                                onclick="copyBirthdayMessage(${member.id})"
+                            >
+                                Copy Message
+                            </button>
 
                         </div>
 
                     </div>
+                `;
 
-                    <div class="birthday-actions">
-
-                        <button
-                            type="button"
-                            class="birthday-button"
-                            onclick="copyBirthdayMessage(${member.id})"
-                        >
-                            Copy Message
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
-
-        }).join("");
+            }
+        ).join("");
 }
 
 
-// ======================================================
-// COPY BIRTHDAY MESSAGE
-// ======================================================
-
-async function copyBirthdayMessage(memberId) {
+async function copyBirthdayMessage(
+    memberId
+) {
 
     const member =
-        allMembers.find(function (item) {
+        allMembers.find(
+            function (item) {
 
-            return Number(item.id) ===
-                Number(memberId);
+                return (
+                    Number(item.id) ===
+                    Number(memberId)
+                );
 
-        });
-
+            }
+        );
 
     if (!member) {
+
         return;
     }
 
-
     const message =
-        birthdayMessage(member);
-
+        birthdayMessage(
+            member
+        );
 
     try {
 
@@ -2764,51 +4123,65 @@ function loadReports() {
     const total =
         allMembers.length;
 
-
     const active =
-        allMembers.filter(function (member) {
+        allMembers.filter(
+            function (member) {
 
-            return String(member.status || "Active")
-                .toLowerCase() === "active";
+                return (
+                    String(
+                        member.status ||
+                        "Active"
+                    ).toLowerCase() ===
+                    "active"
+                );
 
-        }).length;
-
+            }
+        ).length;
 
     const male =
-        allMembers.filter(function (member) {
+        allMembers.filter(
+            function (member) {
 
-            return String(member.gender || "")
-                .toLowerCase() === "male";
+                return (
+                    String(
+                        member.gender ||
+                        ""
+                    ).toLowerCase() ===
+                    "male"
+                );
 
-        }).length;
-
+            }
+        ).length;
 
     const female =
-        allMembers.filter(function (member) {
+        allMembers.filter(
+            function (member) {
 
-            return String(member.gender || "")
-                .toLowerCase() === "female";
+                return (
+                    String(
+                        member.gender ||
+                        ""
+                    ).toLowerCase() ===
+                    "female"
+                );
 
-        }).length;
-
+            }
+        ).length;
 
     setText(
         "reportTotalMembers",
         total
     );
 
-
     setText(
         "reportActiveMembers",
         active
     );
 
-
     setText(
         "reportMaleMembers",
         male
     );
-
 
     setText(
         "reportFemaleMembers",
@@ -2844,16 +4217,22 @@ function refreshDashboard() {
 function setupMobileMenu() {
 
     const mobileMenu =
-        document.getElementById("mobileMenu");
+        document.getElementById(
+            "mobileMenu"
+        );
 
     const sidebar =
-        document.querySelector(".sidebar");
+        document.querySelector(
+            ".sidebar"
+        );
 
+    if (
+        !mobileMenu ||
+        !sidebar
+    ) {
 
-    if (!mobileMenu || !sidebar) {
         return;
     }
-
 
     mobileMenu.addEventListener(
         "click",
@@ -2879,24 +4258,30 @@ function setupNavigation() {
             "[data-page]"
         );
 
+    navLinks.forEach(
+        function (link) {
 
-    navLinks.forEach(function (link) {
+            link.addEventListener(
+                "click",
+                function () {
 
-        link.addEventListener(
-            "click",
-            function () {
+                    const page =
+                        link.getAttribute(
+                            "data-page"
+                        );
 
-                const page =
-                    link.getAttribute("data-page");
+                    if (page) {
 
-                if (page) {
-                    showPage(page);
+                        showPage(
+                            page
+                        );
+                    }
+
                 }
+            );
 
-            }
-        );
-
-    });
+        }
+    );
 }
 
 
@@ -2907,26 +4292,36 @@ function setupNavigation() {
 function displayCurrentDate() {
 
     const element =
-        document.getElementById("currentDate");
+        document.getElementById(
+            "currentDate"
+        );
 
     if (!element) {
+
         return;
     }
-
 
     const now =
         new Date();
 
-
     const day =
-        String(now.getDate()).padStart(2, "0");
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
 
     const month =
-        String(now.getMonth() + 1).padStart(2, "0");
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
 
     const year =
         now.getFullYear();
-
 
     element.textContent =
         `${day}/${month}/${year}`;
@@ -2940,7 +4335,9 @@ function displayCurrentDate() {
 function setupForms() {
 
     const memberForm =
-        document.getElementById("memberForm");
+        document.getElementById(
+            "memberForm"
+        );
 
     if (memberForm) {
 
@@ -2950,9 +4347,10 @@ function setupForms() {
         );
     }
 
-
     const departmentForm =
-        document.getElementById("departmentForm");
+        document.getElementById(
+            "departmentForm"
+        );
 
     if (departmentForm) {
 
@@ -2962,9 +4360,10 @@ function setupForms() {
         );
     }
 
-
     const attendanceForm =
-        document.getElementById("attendanceForm");
+        document.getElementById(
+            "attendanceForm"
+        );
 
     if (attendanceForm) {
 
@@ -2974,9 +4373,10 @@ function setupForms() {
         );
     }
 
-
     const eventForm =
-        document.getElementById("eventForm");
+        document.getElementById(
+            "eventForm"
+        );
 
     if (eventForm) {
 
@@ -2986,9 +4386,10 @@ function setupForms() {
         );
     }
 
-
     const offeringForm =
-        document.getElementById("offeringForm");
+        document.getElementById(
+            "offeringForm"
+        );
 
     if (offeringForm) {
 
@@ -2998,9 +4399,10 @@ function setupForms() {
         );
     }
 
-
     const userForm =
-        document.getElementById("userForm");
+        document.getElementById(
+            "userForm"
+        );
 
     if (userForm) {
 
@@ -3010,9 +4412,10 @@ function setupForms() {
         );
     }
 
-
     const settingsForm =
-        document.getElementById("settingsForm");
+        document.getElementById(
+            "settingsForm"
+        );
 
     if (settingsForm) {
 
@@ -3022,12 +4425,10 @@ function setupForms() {
         );
     }
 
-
     const cancelMemberEdit =
         document.getElementById(
             "cancelMemberEdit"
         );
-
 
     if (cancelMemberEdit) {
 
@@ -3054,7 +4455,6 @@ function setupSearch() {
             "memberSearch"
         );
 
-
     if (search) {
 
         search.addEventListener(
@@ -3075,7 +4475,6 @@ function setupLogout() {
         document.getElementById(
             "logoutButton"
         );
-
 
     if (logoutButton) {
 
@@ -3161,50 +4560,33 @@ document.addEventListener(
     "DOMContentLoaded",
     async function () {
 
-        // Check login
         if (!checkAuthentication()) {
+
             return;
         }
 
-
-        // Display user
         displayLoggedInUser();
 
+        applyRolePermissions();
 
-        // Display date
         displayCurrentDate();
 
-
-        // Setup navigation
         setupNavigation();
 
-
-        // Setup forms
         setupForms();
 
-
-        // Setup search
         setupSearch();
 
-
-        // Setup logout
         setupLogout();
 
-
-        // Setup mobile menu
         setupMobileMenu();
 
-
-        // Setup quick actions
         setupQuickActions();
 
-
-        // Set today's date for attendance
         const attendanceDate =
             document.getElementById(
                 "attendanceDate"
             );
-
 
         if (
             attendanceDate &&
@@ -3215,13 +4597,11 @@ document.addEventListener(
                 getTodayISO();
         }
 
-
-        // Load application data
         await loadAllData();
 
-
-        // Start on dashboard
-        showPage("dashboard");
+        showPage(
+            "dashboard"
+        );
 
     }
 );
@@ -3266,5 +4646,5 @@ window.searchMembers =
 
 
 // ======================================================
-// END OF PART 2
+// END OF SCRIPT
 // ======================================================

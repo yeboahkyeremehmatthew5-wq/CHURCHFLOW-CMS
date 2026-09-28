@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import bcrypt
-import traceback
 
 from database import engine, Base, get_db
 import models
@@ -170,17 +169,25 @@ def create_member(
 
     return {
         "id": new_member.id,
+
         "name": (
             new_member.first_name
             + " "
             + new_member.last_name
         ).strip(),
+
         "gender": new_member.gender,
+
         "dob": new_member.date_of_birth,
+
         "phone": new_member.phone,
+
         "address": new_member.address,
+
         "date_joined": new_member.membership_date,
+
         "department": new_member.department,
+
         "status": new_member.status
     }
 
@@ -756,6 +763,10 @@ def create_user(
     db: Session = Depends(get_db)
 ):
 
+    # ======================================================
+    # CHECK USERNAME
+    # ======================================================
+
     existing_username = db.query(
         models.User
     ).filter(
@@ -769,6 +780,10 @@ def create_user(
             detail="Username already exists"
         )
 
+
+    # ======================================================
+    # CHECK EMAIL
+    # ======================================================
 
     existing_email = db.query(
         models.User
@@ -784,24 +799,43 @@ def create_user(
         )
 
 
+    # ======================================================
+    # HASH PASSWORD
+    # ======================================================
+
+    hashed_password = hash_password(
+        user.password
+    )
+
+
+    # ======================================================
+    # CREATE USER
+    # ======================================================
+    # Public signup accounts are ALWAYS members.
+    # The role sent by the browser is NOT trusted.
+
     new_user = models.User(
 
         username=user.username,
 
         email=user.email,
 
-        password=hash_password(
-            user.password
-        ),
+        password=hashed_password,
 
-        role=user.role
+        role="member"
     )
+
 
     db.add(new_user)
 
     db.commit()
 
     db.refresh(new_user)
+
+
+    # ======================================================
+    # RETURN SAFE USER INFORMATION
+    # ======================================================
 
     return {
 
@@ -828,7 +862,6 @@ def get_users(
         models.User.id
     ).all()
 
-    # IMPORTANT:
     # Password is deliberately NOT returned.
 
     return [
@@ -899,7 +932,9 @@ def update_user(
         )
 
 
-    # Check username
+    # ======================================================
+    # CHECK USERNAME
+    # ======================================================
 
     username_check = db.query(
         models.User
@@ -916,7 +951,9 @@ def update_user(
         )
 
 
-    # Check email
+    # ======================================================
+    # CHECK EMAIL
+    # ======================================================
 
     email_check = db.query(
         models.User
@@ -940,7 +977,9 @@ def update_user(
     existing_user.role = user.role
 
 
-    # Change password only if one was entered
+    # ======================================================
+    # CHANGE PASSWORD IF PROVIDED
+    # ======================================================
 
     if user.password:
 
@@ -1109,3 +1148,93 @@ def get_settings(
         return None
 
     return setting
+# ==========================================================
+# DASHBOARD API
+# ==========================================================
+
+from datetime import date
+
+
+@app.get("/dashboard")
+def get_dashboard(
+    db: Session = Depends(get_db)
+):
+    # ------------------------------------------------------
+    # TOTAL MEMBERS
+    # ------------------------------------------------------
+
+    total_members = db.query(
+        models.Member
+    ).count()
+
+
+    # ------------------------------------------------------
+    # MALE MEMBERS
+    # ------------------------------------------------------
+
+    male_members = db.query(
+        models.Member
+    ).filter(
+        models.Member.gender.ilike("Male")
+    ).count()
+
+
+    # ------------------------------------------------------
+    # FEMALE MEMBERS
+    # ------------------------------------------------------
+
+    female_members = db.query(
+        models.Member
+    ).filter(
+        models.Member.gender.ilike("Female")
+    ).count()
+
+
+    # ------------------------------------------------------
+    # ACTIVE MEMBERS
+    # ------------------------------------------------------
+
+    active_members = db.query(
+        models.Member
+    ).filter(
+        models.Member.status.ilike("Active")
+    ).count()
+
+
+    # ------------------------------------------------------
+    # TODAY'S ATTENDANCE
+    # ------------------------------------------------------
+
+    today = date.today()
+
+    today_attendance = db.query(
+        models.Attendance
+    ).filter(
+        models.Attendance.attendance_date == today,
+        models.Attendance.status.ilike("Present")
+    ).count()
+
+
+    # ------------------------------------------------------
+    # UPCOMING EVENTS
+    # ------------------------------------------------------
+
+    upcoming_events = db.query(
+        models.Event
+    ).filter(
+        models.Event.date >= today
+    ).count()
+
+
+    # ------------------------------------------------------
+    # RETURN DASHBOARD DATA
+    # ------------------------------------------------------
+
+    return {
+        "total_members": total_members,
+        "male_members": male_members,
+        "female_members": female_members,
+        "active_members": active_members,
+        "today_attendance": today_attendance,
+        "upcoming_events": upcoming_events
+    }

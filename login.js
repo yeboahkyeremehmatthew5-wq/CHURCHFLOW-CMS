@@ -1,18 +1,13 @@
 // ======================================================
-// CHURCHFLOW LOGIN JAVASCRIPT
+// CHURCHFLOW CMS - LOGIN JAVASCRIPT
 // ======================================================
 
 const API_URL = "http://127.0.0.1:8000";
 
-
-// ======================================================
-// LOGIN PAGE
-// ======================================================
-
 document.addEventListener("DOMContentLoaded", function () {
 
     // ==================================================
-    // PASSWORD SHOW / HIDE
+    // SHOW / HIDE PASSWORD
     // ==================================================
 
     const togglePassword =
@@ -20,7 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const passwordInput =
         document.getElementById("password");
-
 
     if (togglePassword && passwordInput) {
 
@@ -39,12 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     passwordInput.type = "password";
 
                     togglePassword.textContent = "Show";
-
                 }
-
             }
         );
-
     }
 
 
@@ -54,7 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const loginForm =
         document.getElementById("loginForm");
-
 
     if (!loginForm) {
         return;
@@ -68,10 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
 
 
-            // ==========================================
-            // GET FORM VALUES
-            // ==========================================
-
+            // Get username
             const username =
                 document
                     .getElementById("username")
@@ -79,26 +66,37 @@ document.addEventListener("DOMContentLoaded", function () {
                     .trim();
 
 
+            // Get password
             const password =
                 document
                     .getElementById("password")
                     .value;
 
 
+            // Get remember me
             const rememberMe =
                 document
                     .getElementById("rememberMe")
                     .checked;
 
 
+            // Message area
             const message =
-                document
-                    .getElementById("loginMessage");
+                document.getElementById("loginMessage");
 
 
-            // ==========================================
-            // CLEAR OLD MESSAGE
-            // ==========================================
+            // Check empty fields
+            if (!username || !password) {
+
+                message.textContent =
+                    "Please enter your username and password.";
+
+                message.className =
+                    "login-message error";
+
+                return;
+            }
+
 
             message.textContent =
                 "Logging in...";
@@ -109,9 +107,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             try {
 
-                // ======================================
+                // ==================================================
                 // SEND LOGIN REQUEST TO FASTAPI
-                // ======================================
+                // ==================================================
 
                 const response =
                     await fetch(
@@ -125,57 +123,47 @@ document.addEventListener("DOMContentLoaded", function () {
                             },
 
                             body: JSON.stringify({
-
                                 username: username,
-
                                 password: password
-
                             })
                         }
                     );
 
 
-                // ======================================
-                // READ SERVER RESPONSE
-                // ======================================
-
+                // Read response
                 const data =
                     await response.json();
 
 
-                // ======================================
-                // CHECK FOR LOGIN ERROR
-                // ======================================
+                // ==================================================
+                // LOGIN FAILED
+                // ==================================================
 
                 if (!response.ok) {
 
                     throw new Error(
                         data.detail ||
-                        "Invalid username or password"
+                        "Invalid username or password."
                     );
-
                 }
 
 
-                // ======================================
+                // ==================================================
                 // SAVE LOGGED-IN USER
-                // ======================================
+                // ==================================================
 
                 const loggedInUser = {
 
                     username:
-                        data.username,
+                        data.username || username,
 
                     role:
-                        data.role
+                        data.role || "member"
 
                 };
 
 
-                // ======================================
-                // REMOVE OLD LOGIN DATA
-                // ======================================
-
+                // Clear old login information
                 localStorage.removeItem(
                     "churchflowUser"
                 );
@@ -185,10 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
 
 
-                // ======================================
-                // REMEMBER ME
-                // ======================================
-
+                // Remember login
                 if (rememberMe) {
 
                     localStorage.setItem(
@@ -202,13 +187,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         "churchflowUser",
                         JSON.stringify(loggedInUser)
                     );
-
                 }
 
 
-                // ======================================
+                // ==================================================
                 // SUCCESS MESSAGE
-                // ======================================
+                // ==================================================
 
                 message.textContent =
                     "Login successful. Opening ChurchFlow...";
@@ -217,25 +201,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "login-message success";
 
 
-                // ======================================
-                // REDIRECT TO FRONTEND
-                // ======================================
-                //
-                // IMPORTANT:
-                // The frontend is being served by
-                // Live Server on port 5501.
-                //
-                // FastAPI is only the backend.
-                //
-                // Therefore we explicitly open:
-                //
-                // http://127.0.0.1:5501/index.html
-                //
-                // instead of:
-                //
-                // http://127.0.0.1:8000/Backend/index.html
-                //
-                // ======================================
+                // ==================================================
+                // OPEN DASHBOARD
+                // ==================================================
 
                 setTimeout(function () {
 
@@ -246,10 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             } catch (error) {
-
-                // ======================================
-                // LOGIN ERROR
-                // ======================================
 
                 console.error(
                     "Login error:",
@@ -263,7 +227,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 message.className =
                     "login-message error";
-
             }
 
         }

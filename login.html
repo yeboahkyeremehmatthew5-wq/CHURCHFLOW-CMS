@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>ChurchFlow CMS - Login</title>
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+</head><body><div class="login-container">
+
+    <div class="login-card">
+
+        <h1>ChurchFlow CMS</h1>
+
+        <p class="login-subtitle">
+            Church Management System
+        </p>
+
+        <form id="loginForm">
+
+            <!-- USERNAME -->
+            <div class="form-group">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Enter username"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        id="togglePassword"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- REMEMBER ME -->
+            <div class="remember-row">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="rememberMe"
+                    >
+
+                    Remember me
+                </label>
+
+            </div>
+
+
+            <!-- LOGIN BUTTON -->
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Login
+            </button>
+
+
+            <!-- LOGIN MESSAGE -->
+            <p
+                id="loginMessage"
+                class="login-message"
+            ></p>
+
+        </form>
+
+
+        <!-- SIGN UP -->
+        <div class="signup-link">
+
+            <span>
+                Don't have an account?
+            </span>
+
+            <a href="signup.html">
+                Sign Up
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="login.js"></script>
+
+</body></html>

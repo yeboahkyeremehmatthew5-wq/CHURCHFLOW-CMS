@@ -10,6 +10,10 @@
 }
 
 
+/* ======================================================
+   ROOT VARIABLES
+====================================================== */
+
 :root {
 
     --primary: #4f46e5;
@@ -40,6 +44,10 @@
 
 }
 
+
+/* ======================================================
+   GLOBAL
+====================================================== */
 
 html {
     scroll-behavior: smooth;
@@ -110,18 +118,28 @@ button {
 
     bottom: 0;
 
+    height: 100vh;
+
     display: flex;
 
     flex-direction: column;
 
     z-index: 1000;
 
+    overflow: hidden;
+
 }
 
+
+/* ======================================================
+   BRAND
+====================================================== */
 
 .brand {
 
     height: 85px;
+
+    min-height: 85px;
 
     padding: 0 20px;
 
@@ -134,6 +152,8 @@ button {
     border-bottom:
         1px solid rgba(255,255,255,0.08);
 
+    flex-shrink: 0;
+
 }
 
 
@@ -142,6 +162,8 @@ button {
     width: 43px;
 
     height: 43px;
+
+    min-width: 43px;
 
     border-radius: 12px;
 
@@ -154,6 +176,13 @@ button {
     background: var(--primary);
 
     font-size: 20px;
+
+}
+
+
+.brand-text {
+
+    min-width: 0;
 
 }
 
@@ -176,6 +205,10 @@ button {
 }
 
 
+/* ======================================================
+   MENU TITLE
+====================================================== */
+
 .menu-title {
 
     padding:
@@ -194,12 +227,68 @@ button {
 }
 
 
+/* ======================================================
+   SIDEBAR MENU
+====================================================== */
+
 .sidebar-menu {
 
-    padding: 0 11px;
+    padding: 0 11px 15px 11px;
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(255,255,255,0.25)
+        transparent;
 
 }
 
+
+/* Chrome / Edge / Safari scrollbar */
+
+.sidebar-menu::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+
+.sidebar-menu::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,0.20);
+
+    border-radius: 10px;
+
+}
+
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+
+    background:
+        rgba(255,255,255,0.35);
+
+}
+
+
+/* ======================================================
+   NAVIGATION ITEMS
+====================================================== */
 
 .nav-item {
 
@@ -229,12 +318,16 @@ button {
 
     transition: 0.2s;
 
+    flex-shrink: 0;
+
 }
 
 
 .nav-item i {
 
     width: 20px;
+
+    min-width: 20px;
 
     text-align: center;
 
@@ -260,6 +353,10 @@ button {
 }
 
 
+/* ======================================================
+   SIDEBAR BOTTOM
+====================================================== */
+
 .sidebar-bottom {
 
     margin-top: auto;
@@ -269,8 +366,16 @@ button {
     border-top:
         1px solid rgba(255,255,255,0.08);
 
+    background: var(--sidebar);
+
+    flex-shrink: 0;
+
 }
 
+
+/* ======================================================
+   LOGOUT BUTTON
+====================================================== */
 
 .logout-button {
 
@@ -1909,6 +2014,496 @@ tbody tr:hover {
 
 
 /* ======================================================
+   BIRTHDAY SECTION
+====================================================== */
+
+.birthday-panel {
+
+    margin-top: 20px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.birthday-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+
+.birthday-card {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: #fafbff;
+
+    transition: 0.2s ease;
+
+}
+
+
+.birthday-card:hover {
+
+    border-color: #c7d2fe;
+
+    transform: translateY(-1px);
+
+}
+
+
+.birthday-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+
+}
+
+
+.birthday-avatar {
+
+    width: 45px;
+
+    height: 45px;
+
+    min-width: 45px;
+
+    border-radius: 50%;
+
+    background: #fff7ed;
+
+    color: #ea580c;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 20px;
+
+}
+
+
+.birthday-name {
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: var(--text);
+
+    margin-bottom: 4px;
+
+}
+
+
+.birthday-message {
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+    max-width: 650px;
+
+}
+
+
+.birthday-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+}
+
+
+.birthday-button {
+
+    border: none;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 8px 11px;
+
+    border-radius: 6px;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+
+}
+
+
+.birthday-button:hover {
+
+    background: var(--primary-dark);
+
+}
+
+
+.birthday-button:last-child {
+
+    background: #16a34a;
+
+}
+
+
+.birthday-button:last-child:hover {
+
+    background: #15803d;
+
+}
+
+
+/* ======================================================
+   LOGIN / SIGNUP PAGE
+====================================================== */
+
+.login-container {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #1d4ed8 50%,
+            #2563eb 100%
+        );
+
+}
+
+
+.login-card {
+
+    width: 100%;
+
+    max-width: 420px;
+
+    padding: 40px;
+
+    border-radius: 18px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.30);
+
+}
+
+
+.login-card h1 {
+
+    margin: 0;
+
+    text-align: center;
+
+    color: #1d4ed8;
+
+    font-size: 32px;
+
+    font-weight: 800;
+
+}
+
+
+.login-subtitle {
+
+    text-align: center;
+
+    margin: 8px 0 30px;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+}
+
+
+.login-card .form-group {
+
+    margin-bottom: 20px;
+
+}
+
+
+.login-card label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #1e293b;
+
+    font-weight: 600;
+
+}
+
+
+.login-card input[type="text"],
+.login-card input[type="email"],
+.login-card input[type="password"] {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px;
+
+    border: 2px solid #e2e8f0;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition: 0.2s;
+
+}
+
+
+.login-card input[type="text"]:focus,
+.login-card input[type="email"]:focus,
+.login-card input[type="password"]:focus {
+
+    border-color: #2563eb;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
+
+}
+
+
+.password-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.password-wrapper input {
+
+    flex: 1;
+
+}
+
+
+.password-wrapper button {
+
+    padding: 13px 14px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #e2e8f0;
+
+    color: #1e293b;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+
+.password-wrapper button:hover {
+
+    background: #cbd5e1;
+
+}
+
+
+.remember-row {
+
+    margin-bottom: 20px;
+
+}
+
+
+.remember-row label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #475569;
+
+    font-weight: normal;
+
+}
+
+
+.remember-row input {
+
+    width: auto;
+
+}
+
+
+.login-button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #1d4ed8,
+            #2563eb
+        );
+
+    color: #ffffff;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.login-button:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.30);
+
+}
+
+
+.login-message {
+
+    min-height: 20px;
+
+    margin-top: 15px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+
+.login-message.success {
+
+    color: #16a34a;
+
+}
+
+
+.login-message.error {
+
+    color: #dc2626;
+
+}
+
+
+/* ======================================================
+   SIGNUP LINK
+====================================================== */
+
+.signup-link {
+
+    margin-top: 20px;
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: #64748b;
+
+}
+
+
+.signup-link a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: 700;
+
+    margin-left: 5px;
+
+}
+
+
+.signup-link a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* ======================================================
    RESPONSIVE
 ====================================================== */
 
@@ -2080,146 +2675,135 @@ tbody tr:hover {
 
     }
 
-}
-/* ======================================================
-   BIRTHDAY SECTION
-====================================================== */
-
-.birthday-panel {
-    margin-top: 20px;
-    margin-bottom: 25px;
-}
-
-
-.birthday-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-
-.birthday-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #fafbff;
-    transition: 0.2s ease;
-}
-
-
-.birthday-card:hover {
-    border-color: #c7d2fe;
-    transform: translateY(-1px);
-}
-
-
-.birthday-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-
-.birthday-avatar {
-    width: 45px;
-    height: 45px;
-    min-width: 45px;
-    border-radius: 50%;
-    background: #fff7ed;
-    color: #ea580c;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-}
-
-
-.birthday-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--text);
-    margin-bottom: 4px;
-}
-
-
-.birthday-message {
-    color: var(--muted);
-    font-size: 9px;
-    line-height: 1.5;
-    max-width: 650px;
-}
-
-
-.birthday-actions {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex-shrink: 0;
-}
-
-
-.birthday-button {
-    border: none;
-    background: var(--primary);
-    color: white;
-    padding: 8px 11px;
-    border-radius: 6px;
-    font-size: 9px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-
-.birthday-button:hover {
-    background: var(--primary-dark);
-}
-
-
-.birthday-button:last-child {
-    background: #16a34a;
-}
-
-
-.birthday-button:last-child:hover {
-    background: #15803d;
-}
-
-
-/* ======================================================
-   BIRTHDAY RESPONSIVE
-====================================================== */
-
-@media (max-width: 650px) {
 
     .birthday-card {
+
         align-items: flex-start;
+
         flex-direction: column;
+
     }
 
 
     .birthday-info {
+
         width: 100%;
+
     }
 
 
     .birthday-actions {
+
         width: 100%;
+
     }
 
 
     .birthday-button {
+
         flex: 1;
+
     }
 
 
     .birthday-message {
+
         max-width: 100%;
+
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .login-container {
+
+        padding: 15px;
+
+    }
+
+
+    .login-card {
+
+        padding: 30px 20px;
+
+    }
+
+
+    .login-card h1 {
+
+        font-size: 27px;
+
+    }
+
+}
+/* ======================================================
+   EDIT & DELETE BUTTONS
+   MEMBERS + DEPARTMENTS
+====================================================== */
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+}
+
+/* EDIT BUTTON */
+.edit-btn {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.edit-btn:hover {
+    background: #c7d2fe;
+    transform: translateY(-1px);
+}
+
+/* DELETE BUTTON */
+.delete-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+}
+
+/* MEMBER / DEPARTMENT TABLE ACTIONS */
+.table-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* SMALL SCREEN */
+@media (max-width: 600px) {
+
+    .action-btn {
+        padding: 7px 10px;
+        font-size: 12px;
+        min-width: 60px;
+    }
+
+    .action-buttons {
+        gap: 5px;
     }
 
 }
